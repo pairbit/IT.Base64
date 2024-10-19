@@ -60,14 +60,14 @@ public class Benchmark128
     //[Benchmark]
     public string EncodeToString_IT() => string.Create(22, _guid, static (chars, value) =>
     {
-        UnsafeBase64.Encode128(Base64Url.Chars, ref Unsafe.As<Guid, byte>(ref value), ref MemoryMarshal.GetReference(chars));
+        UnsafeBase64.Encode128(Base64Encoder.Url._chars, ref Unsafe.As<Guid, byte>(ref value), ref MemoryMarshal.GetReference(chars));
     });
 
     //[Benchmark]
     public string EncodeToString_IT_Ref()
     {
         var newStr = new string('\0', 22);
-        UnsafeBase64.Encode128(Base64Url.Chars, ref Unsafe.As<Guid, byte>(ref _guid), ref Unsafe.AsRef(in newStr.GetPinnableReference()));
+        UnsafeBase64.Encode128(Base64Encoder.Url._chars, ref Unsafe.As<Guid, byte>(ref _guid), ref Unsafe.AsRef(in newStr.GetPinnableReference()));
         return newStr;
     }
 
@@ -118,7 +118,7 @@ public class Benchmark128
     public byte[] EncodeToBytes_IT()
     {
         var encodedBytes = new byte[22];
-        UnsafeBase64.Encode128(Base64Url.Bytes, ref Unsafe.As<Guid, byte>(ref _guid), ref encodedBytes[0]);
+        UnsafeBase64.Encode128(Base64Encoder.Url._bytes, ref Unsafe.As<Guid, byte>(ref _guid), ref encodedBytes[0]);
         return encodedBytes;
     }
 
@@ -158,7 +158,7 @@ public class Benchmark128
     public Guid DecodeFromString_IT()
     {
         Guid guid = default;
-        UnsafeBase64.TryDecode128(Base64Url.Map, ref Unsafe.AsRef(in _encodedString.GetPinnableReference()), ref Unsafe.As<Guid, byte>(ref guid));
+        UnsafeBase64.TryDecode128(Base64Decoder.Url._map, ref Unsafe.AsRef(in _encodedString.GetPinnableReference()), ref Unsafe.As<Guid, byte>(ref guid));
         return guid;
     }
 
@@ -186,7 +186,7 @@ public class Benchmark128
     public Guid DecodeFromBytes_IT()
     {
         Guid guid = default;
-        UnsafeBase64.TryDecode128(Base64Url.Map, ref _encodedBytes[0], ref Unsafe.As<Guid, byte>(ref guid));
+        UnsafeBase64.TryDecode128(Base64Decoder.Url._map, ref _encodedBytes[0], ref Unsafe.As<Guid, byte>(ref guid));
         return guid;
     }
 

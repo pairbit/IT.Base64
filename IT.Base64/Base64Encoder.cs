@@ -9,10 +9,14 @@ public class Base64Encoder
     public static readonly Base64Encoder Default = new("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
     public static readonly Base64Encoder Url = new("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_");
 
-    private readonly char[] _chars;
-    private readonly byte[] _bytes;
+    internal readonly char[] _chars;
+    internal readonly byte[] _bytes;
 
     public string Encoding { get; }
+
+    public ReadOnlyMemory<char> Chars => _chars;
+
+    public ReadOnlyMemory<byte> Bytes => _bytes;
 
     public Base64Encoder(string encoding)
     {
