@@ -255,12 +255,12 @@ public class Base64UrlTest
         Int16 int16 = default;
         UnsafeBase64.Encode8(Base64Url.Bytes, ref value, ref Unsafe.As<short, byte>(ref int16));
         Assert.That(Base64Url.Encode8ToInt16(value), Is.EqualTo(int16));
-        Assert.That(Base64.ToString(int16), Is.EqualTo(str));
-        Assert.That(Base64.ToString((ushort)int16), Is.EqualTo(str));
-        Assert.That(Base64.To<short>(str), Is.EqualTo(int16));
-        Assert.That(Base64.TryTo<short>(str, out var uint16_2), Is.True);
+        Assert.That(Base64Encoded.ToString(int16), Is.EqualTo(str));
+        Assert.That(Base64Encoded.ToString((ushort)int16), Is.EqualTo(str));
+        Assert.That(Base64Encoded.To<short>(str), Is.EqualTo(int16));
+        Assert.That(Base64Encoded.TryTo<short>(str, out var uint16_2), Is.True);
         Assert.That(uint16_2, Is.EqualTo(int16));
-        Assert.That(Base64.TryTo<int>(str, out var int32), Is.False);
+        Assert.That(Base64Encoded.TryTo<int>(str, out var int32), Is.False);
         Assert.That(int32, Is.EqualTo(default(int)));
         return str;
     }
@@ -596,12 +596,12 @@ public class Base64UrlTest
         Int32 int32 = default;
         UnsafeBase64.Encode24(Base64Url.Bytes, ref Unsafe.As<T, byte>(ref value), ref Unsafe.As<int, byte>(ref int32));
         Assert.That(Base64Url.Encode24ToInt32(value), Is.EqualTo(int32));
-        Assert.That(Base64.ToString(int32), Is.EqualTo(str));
-        Assert.That(Base64.ToString((uint)int32), Is.EqualTo(str));
-        Assert.That(Base64.To<int>(str), Is.EqualTo(int32));
-        Assert.That(Base64.TryTo<int>(str, out var int32_2), Is.True);
+        Assert.That(Base64Encoded.ToString(int32), Is.EqualTo(str));
+        Assert.That(Base64Encoded.ToString((uint)int32), Is.EqualTo(str));
+        Assert.That(Base64Encoded.To<int>(str), Is.EqualTo(int32));
+        Assert.That(Base64Encoded.TryTo<int>(str, out var int32_2), Is.True);
         Assert.That(int32_2, Is.EqualTo(int32));
-        Assert.That(Base64.TryTo<short>(str, out var int16), Is.False);
+        Assert.That(Base64Encoded.TryTo<short>(str, out var int16), Is.False);
         Assert.That(int16, Is.EqualTo(default(short)));
 
         return str;

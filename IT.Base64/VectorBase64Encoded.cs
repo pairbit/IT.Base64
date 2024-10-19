@@ -6,7 +6,7 @@ using System.Runtime.Intrinsics.X86;
 
 namespace IT.Base64;
 
-internal static class VectorBase64
+public static class VectorBase64Encoded
 {
     internal static void ToChar176(ref byte by, ref char ch)
     {
@@ -22,7 +22,7 @@ internal static class VectorBase64
         }
         else
         {
-            UnsafeBase64.ToChar176(ref by, ref ch);
+            Base64Encoded.UnsafeToChar176(ref by, ref ch);
         }
     }
 
@@ -42,7 +42,7 @@ internal static class VectorBase64
         }
         else
         {
-            return Base64.ToString(encoded);
+            return Base64Encoded.ToString(encoded);
         }
     }
 }

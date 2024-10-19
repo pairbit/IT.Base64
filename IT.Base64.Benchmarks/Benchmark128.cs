@@ -75,7 +75,7 @@ public class Benchmark128
     public string EncodedToString_IT()
     {
         var str = new string('\0', 22);
-        UnsafeBase64.ToChar176(ref Unsafe.As<Struct176, byte>(ref _encodedStruct), ref Unsafe.AsRef(in str.GetPinnableReference()));
+        Base64Encoded.UnsafeToChar176(ref Unsafe.As<Struct176, byte>(ref _encodedStruct), ref Unsafe.AsRef(in str.GetPinnableReference()));
         return str;
     }
 
@@ -83,7 +83,7 @@ public class Benchmark128
     public string EncodedToString_IT_Vector()
     {
         var str = new string('\0', 22);
-        VectorBase64.ToChar176(ref Unsafe.As<Struct176, byte>(ref _encodedStruct), ref Unsafe.AsRef(in str.GetPinnableReference()));
+        VectorBase64Encoded.ToChar176(ref Unsafe.As<Struct176, byte>(ref _encodedStruct), ref Unsafe.AsRef(in str.GetPinnableReference()));
         return str;
     }
 

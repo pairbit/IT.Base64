@@ -1437,32 +1437,6 @@ public static class UnsafeBase64
 
     #endregion IsValid8
 
-    internal static void ToChar176(ref byte by, ref char ch)
-    {
-        ch = (char)by;
-        Unsafe.AddByteOffset(ref ch, 2) = (char)Unsafe.AddByteOffset(ref by, 1);
-        Unsafe.AddByteOffset(ref ch, 4) = (char)Unsafe.AddByteOffset(ref by, 2);
-        Unsafe.AddByteOffset(ref ch, 6) = (char)Unsafe.AddByteOffset(ref by, 3);
-        Unsafe.AddByteOffset(ref ch, 8) = (char)Unsafe.AddByteOffset(ref by, 4);
-        Unsafe.AddByteOffset(ref ch, 10) = (char)Unsafe.AddByteOffset(ref by, 5);
-        Unsafe.AddByteOffset(ref ch, 12) = (char)Unsafe.AddByteOffset(ref by, 6);
-        Unsafe.AddByteOffset(ref ch, 14) = (char)Unsafe.AddByteOffset(ref by, 7);
-        Unsafe.AddByteOffset(ref ch, 16) = (char)Unsafe.AddByteOffset(ref by, 8);
-        Unsafe.AddByteOffset(ref ch, 18) = (char)Unsafe.AddByteOffset(ref by, 9);
-        Unsafe.AddByteOffset(ref ch, 20) = (char)Unsafe.AddByteOffset(ref by, 10);
-        Unsafe.AddByteOffset(ref ch, 22) = (char)Unsafe.AddByteOffset(ref by, 11);
-        Unsafe.AddByteOffset(ref ch, 24) = (char)Unsafe.AddByteOffset(ref by, 12);
-        Unsafe.AddByteOffset(ref ch, 26) = (char)Unsafe.AddByteOffset(ref by, 13);
-        Unsafe.AddByteOffset(ref ch, 28) = (char)Unsafe.AddByteOffset(ref by, 14);
-        Unsafe.AddByteOffset(ref ch, 30) = (char)Unsafe.AddByteOffset(ref by, 15);
-        Unsafe.AddByteOffset(ref ch, 32) = (char)Unsafe.AddByteOffset(ref by, 16);
-        Unsafe.AddByteOffset(ref ch, 34) = (char)Unsafe.AddByteOffset(ref by, 17);
-        Unsafe.AddByteOffset(ref ch, 36) = (char)Unsafe.AddByteOffset(ref by, 18);
-        Unsafe.AddByteOffset(ref ch, 38) = (char)Unsafe.AddByteOffset(ref by, 19);
-        Unsafe.AddByteOffset(ref ch, 40) = (char)Unsafe.AddByteOffset(ref by, 20);
-        Unsafe.AddByteOffset(ref ch, 42) = (char)Unsafe.AddByteOffset(ref by, 21);
-    }
-
     public static byte GetInvalid(sbyte[] map, ref byte encoded, int len)
     {
         for (int i = 0; i < len; i++)
