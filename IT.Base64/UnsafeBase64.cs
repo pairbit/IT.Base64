@@ -1437,7 +1437,7 @@ public static class UnsafeBase64
 
     #endregion IsValid8
 
-    public static void ToChar176(ref byte by, ref char ch)
+    internal static void ToChar176(ref byte by, ref char ch)
     {
         ch = (char)by;
         Unsafe.AddByteOffset(ref ch, 2) = (char)Unsafe.AddByteOffset(ref by, 1);

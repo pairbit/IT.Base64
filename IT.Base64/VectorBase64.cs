@@ -6,9 +6,9 @@ using System.Runtime.Intrinsics.X86;
 
 namespace IT.Base64;
 
-public static class VectorBase64
+internal static class VectorBase64
 {
-    public static void ToChar176(ref byte by, ref char ch)
+    internal static void ToChar176(ref byte by, ref char ch)
     {
         if (BitConverter.IsLittleEndian && Vector128.IsHardwareAccelerated && Sse2.IsSupported)
         {
@@ -26,7 +26,7 @@ public static class VectorBase64
         }
     }
 
-    public static string ToString<T>(T encoded) where T : unmanaged
+    internal static string ToString<T>(T encoded) where T : unmanaged
     {
         if (BitConverter.IsLittleEndian && Vector128.IsHardwareAccelerated && Sse2.IsSupported && Unsafe.SizeOf<T>() > 16)
         {
