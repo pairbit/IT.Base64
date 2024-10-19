@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace IT.Base64;
 
-public class Base64Encoded
+public static class Base64Encoded
 {
     public static string ToString(ushort encoded) => string.Create(2, encoded, static (chars, encoded) =>
     {
