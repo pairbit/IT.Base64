@@ -22,6 +22,67 @@ public class Base64Encoder
         _bytes = System.Text.Encoding.UTF8.GetBytes(Encoding);
     }
 
+    #region Encode128
+
+    public EncodingStatus TryEncode128(Int128 value, Span<byte> encoded)
+    {
+        if (encoded.Length < 22) return EncodingStatus.InvalidDestinationLength;
+
+        UnsafeBase64.Encode128(_bytes, ref Unsafe.As<Int128, byte>(ref value), ref MemoryMarshal.GetReference(encoded));
+
+        return EncodingStatus.Done;
+    }
+
+    public EncodingStatus TryEncode128(Int128 value, Span<char> encoded)
+    {
+        if (encoded.Length < 22) return EncodingStatus.InvalidDestinationLength;
+
+        UnsafeBase64.Encode128(_chars, ref Unsafe.As<Int128, byte>(ref value), ref MemoryMarshal.GetReference(encoded));
+
+        return EncodingStatus.Done;
+    }
+
+    /// <exception cref="ArgumentOutOfRangeException"/>
+    public void Encode128(Int128 value, Span<byte> encoded)
+    {
+        if (encoded.Length < 22) throw new ArgumentOutOfRangeException(nameof(encoded), encoded.Length, "length < 22");
+
+        UnsafeBase64.Encode128(_bytes, ref Unsafe.As<Int128, byte>(ref value), ref MemoryMarshal.GetReference(encoded));
+    }
+
+    /// <exception cref="ArgumentOutOfRangeException"/>
+    public void Encode128(Int128 value, Span<char> encoded)
+    {
+        if (encoded.Length < 22) throw new ArgumentOutOfRangeException(nameof(encoded), encoded.Length, "length < 22");
+
+        UnsafeBase64.Encode128(_chars, ref Unsafe.As<Int128, byte>(ref value), ref MemoryMarshal.GetReference(encoded));
+    }
+
+    public byte[] Encode128ToBytes(Int128 value)
+    {
+        var encoded = new byte[22];
+
+        UnsafeBase64.Encode128(_bytes, ref Unsafe.As<Int128, byte>(ref value), ref encoded[0]);
+
+        return encoded;
+    }
+
+    public char[] Encode128ToChars(Int128 value)
+    {
+        var encoded = new char[22];
+
+        UnsafeBase64.Encode128(_chars, ref Unsafe.As<Int128, byte>(ref value), ref encoded[0]);
+
+        return encoded;
+    }
+
+    public string Encode128ToString(Int128 value) => string.Create(22, value, (chars, value) =>
+    {
+        UnsafeBase64.Encode128(_chars, ref Unsafe.As<Int128, byte>(ref value), ref MemoryMarshal.GetReference(chars));
+    });
+
+    #endregion Encode128
+
     #region Encode72
 
     public EncodingStatus TryEncode72(ReadOnlySpan<byte> bytes, Span<byte> encoded)
