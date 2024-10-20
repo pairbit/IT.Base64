@@ -10,10 +10,6 @@ namespace IT.Base64;
 
 public static class VectorBase64Url
 {
-    private static readonly char[] _chars = Base64Encoder.Url._chars;
-    private static readonly byte[] _bytes = Base64Encoder.Url._bytes;
-    private static readonly sbyte[] _map = Base64Decoder.Url._map;
-
     #region Encode128
 
     public static EncodingStatus TryEncode128(Int128 value, Span<byte> encoded)
@@ -220,12 +216,13 @@ public static class VectorBase64Url
         if (BitConverter.IsLittleEndian && Vector128.IsHardwareAccelerated && (Ssse3.IsSupported || AdvSimd.Arm64.IsSupported))
         {
             (Ssse3.IsSupported ? Ssse3Encode128(ref src) : Arm64Encode128(ref src)).AsByte().StoreUnsafe(ref encoded);
-            UnsafeBase64.Encode24(_bytes, ref Unsafe.AddByteOffset(ref src, 12), ref Unsafe.AddByteOffset(ref encoded, 16));
-            UnsafeBase64.Encode8(_bytes, ref Unsafe.AddByteOffset(ref src, 15), ref Unsafe.AddByteOffset(ref encoded, 20));
+            ref var bytes = ref MemoryMarshal.GetReference(Base64Encoder.Url.Bytes.Span);
+            UnsafeBase64.Encode24(ref bytes, ref Unsafe.AddByteOffset(ref src, 12), ref Unsafe.AddByteOffset(ref encoded, 16));
+            UnsafeBase64.Encode8(ref bytes, ref Unsafe.AddByteOffset(ref src, 15), ref Unsafe.AddByteOffset(ref encoded, 20));
         }
         else
         {
-            UnsafeBase64.Encode128(_bytes, ref src, ref encoded);
+            UnsafeBase64.Encode128(ref MemoryMarshal.GetReference(Base64Encoder.Url.Bytes.Span), ref src, ref encoded);
         }
     }
 
@@ -241,12 +238,13 @@ public static class VectorBase64Url
             {
                 xVector128.StoreUnsafe(Arm64Encode128(ref src), ref encoded);
             }
-            UnsafeBase64.Encode24(_chars, ref Unsafe.AddByteOffset(ref src, 12), ref Unsafe.AddByteOffset(ref encoded, 32));
-            UnsafeBase64.Encode8(_chars, ref Unsafe.AddByteOffset(ref src, 15), ref Unsafe.AddByteOffset(ref encoded, 40));
+            ref var chars = ref MemoryMarshal.GetReference(Base64Encoder.Url.Chars.Span);
+            UnsafeBase64.Encode24(ref chars, ref Unsafe.AddByteOffset(ref src, 12), ref Unsafe.AddByteOffset(ref encoded, 32));
+            UnsafeBase64.Encode8(ref chars, ref Unsafe.AddByteOffset(ref src, 15), ref Unsafe.AddByteOffset(ref encoded, 40));
         }
         else
         {
-            UnsafeBase64.Encode128(_chars, ref src, ref encoded);
+            UnsafeBase64.Encode128(ref MemoryMarshal.GetReference(Base64Encoder.Url.Chars.Span), ref src, ref encoded);
         }
     }
 
@@ -270,11 +268,11 @@ public static class VectorBase64Url
                 throw new NotImplementedException("Arm64");
             }
             vector.AsByte().StoreUnsafe(ref src);
-            return UnsafeBase64.TryDecode32(_map, ref Unsafe.AddByteOffset(ref encoded, 16), ref Unsafe.AddByteOffset(ref src, 12));
+            return UnsafeBase64.TryDecode32(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref Unsafe.AddByteOffset(ref encoded, 16), ref Unsafe.AddByteOffset(ref src, 12));
         }
         else
         {
-            return UnsafeBase64.TryDecode128(_map, ref encoded, ref src);
+            return UnsafeBase64.TryDecode128(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref encoded, ref src);
         }
     }
 
@@ -298,11 +296,11 @@ public static class VectorBase64Url
                 throw new NotImplementedException("Arm64");
             }
             vector.AsByte().StoreUnsafe(ref src);
-            return UnsafeBase64.TryDecode32(_map, ref Unsafe.AddByteOffset(ref encoded, 32), ref Unsafe.AddByteOffset(ref src, 12));
+            return UnsafeBase64.TryDecode32(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref Unsafe.AddByteOffset(ref encoded, 32), ref Unsafe.AddByteOffset(ref src, 12));
         }
         else
         {
-            return UnsafeBase64.TryDecode128(_map, ref encoded, ref src);
+            return UnsafeBase64.TryDecode128(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref encoded, ref src);
         }
     }
 
@@ -319,7 +317,7 @@ public static class VectorBase64Url
                 Vector128<sbyte> eq5F = Vector128.Equals(vector, maskSlashOrUnderscore);
                 if (!IsSsse3Valid128(vector, hiNibbles, eq5F))
                 {
-                    invalid = UnsafeBase64.GetInvalid(_map, ref encoded, 16);
+                    invalid = UnsafeBase64.GetInvalid(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref encoded, 16);
                     return false;
                 }
                 vector = Ssse3Decode128(vector, hiNibbles, eq5F);
@@ -329,11 +327,11 @@ public static class VectorBase64Url
                 throw new NotImplementedException("Arm64");
             }
             vector.AsByte().StoreUnsafe(ref src);
-            return UnsafeBase64.TryDecode32(_map, ref Unsafe.AddByteOffset(ref encoded, 16), ref Unsafe.AddByteOffset(ref src, 12), out invalid);
+            return UnsafeBase64.TryDecode32(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref Unsafe.AddByteOffset(ref encoded, 16), ref Unsafe.AddByteOffset(ref src, 12), out invalid);
         }
         else
         {
-            return UnsafeBase64.TryDecode128(_map, ref encoded, ref src, out invalid);
+            return UnsafeBase64.TryDecode128(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref encoded, ref src, out invalid);
         }
     }
 
@@ -350,7 +348,7 @@ public static class VectorBase64Url
                 Vector128<sbyte> eq5F = Vector128.Equals(vector, maskSlashOrUnderscore);
                 if (!IsSsse3Valid128(vector, hiNibbles, eq5F))
                 {
-                    invalid = UnsafeBase64.GetInvalid(_map, ref encoded, 32);
+                    invalid = UnsafeBase64.GetInvalid(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref encoded, 32);
                     return false;
                 }
                 vector = Ssse3Decode128(vector, hiNibbles, eq5F);
@@ -360,11 +358,11 @@ public static class VectorBase64Url
                 throw new NotImplementedException("Arm64");
             }
             vector.AsByte().StoreUnsafe(ref src);
-            return UnsafeBase64.TryDecode32(_map, ref Unsafe.AddByteOffset(ref encoded, 32), ref Unsafe.AddByteOffset(ref src, 12), out invalid);
+            return UnsafeBase64.TryDecode32(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref Unsafe.AddByteOffset(ref encoded, 32), ref Unsafe.AddByteOffset(ref src, 12), out invalid);
         }
         else
         {
-            return UnsafeBase64.TryDecode128(_map, ref encoded, ref src, out invalid);
+            return UnsafeBase64.TryDecode128(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref encoded, ref src, out invalid);
         }
     }
 
@@ -381,11 +379,11 @@ public static class VectorBase64Url
             {
                 throw new NotImplementedException("Arm64");
             }
-            return UnsafeBase64.IsValid32(_map, ref Unsafe.AddByteOffset(ref encoded, 16));
+            return UnsafeBase64.IsValid32(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref Unsafe.AddByteOffset(ref encoded, 16));
         }
         else
         {
-            return UnsafeBase64.IsValid128(_map, ref encoded);
+            return UnsafeBase64.IsValid128(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref encoded);
         }
     }
 
@@ -402,11 +400,11 @@ public static class VectorBase64Url
             {
                 throw new NotImplementedException("Arm64");
             }
-            return UnsafeBase64.IsValid32(_map, ref Unsafe.AddByteOffset(ref encoded, 32));
+            return UnsafeBase64.IsValid32(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref Unsafe.AddByteOffset(ref encoded, 32));
         }
         else
         {
-            return UnsafeBase64.IsValid128(_map, ref encoded);
+            return UnsafeBase64.IsValid128(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref encoded);
         }
     }
 
@@ -418,7 +416,7 @@ public static class VectorBase64Url
             {
                 if (!IsSsse3Valid128(Vector128.LoadUnsafe(ref encoded).AsSByte()))
                 {
-                    invalid = UnsafeBase64.GetInvalid(_map, ref encoded, 16);
+                    invalid = UnsafeBase64.GetInvalid(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref encoded, 16);
                     return false;
                 }
             }
@@ -426,11 +424,11 @@ public static class VectorBase64Url
             {
                 throw new NotImplementedException("Arm64");
             }
-            return UnsafeBase64.IsValid32(_map, ref Unsafe.AddByteOffset(ref encoded, 16), out invalid);
+            return UnsafeBase64.IsValid32(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref Unsafe.AddByteOffset(ref encoded, 16), out invalid);
         }
         else
         {
-            return UnsafeBase64.IsValid128(_map, ref encoded, out invalid);
+            return UnsafeBase64.IsValid128(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref encoded, out invalid);
         }
     }
 
@@ -442,7 +440,7 @@ public static class VectorBase64Url
             {
                 if (!IsSsse3Valid128(xSse2.LoadUnsafe(ref encoded).AsSByte()))
                 {
-                    invalid = UnsafeBase64.GetInvalid(_map, ref encoded, 32);
+                    invalid = UnsafeBase64.GetInvalid(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref encoded, 32);
                     return false;
                 }
             }
@@ -450,11 +448,11 @@ public static class VectorBase64Url
             {
                 throw new NotImplementedException("Arm64");
             }
-            return UnsafeBase64.IsValid32(_map, ref Unsafe.AddByteOffset(ref encoded, 32), out invalid);
+            return UnsafeBase64.IsValid32(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref Unsafe.AddByteOffset(ref encoded, 32), out invalid);
         }
         else
         {
-            return UnsafeBase64.IsValid128(_map, ref encoded, out invalid);
+            return UnsafeBase64.IsValid128(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref encoded, out invalid);
         }
     }
 

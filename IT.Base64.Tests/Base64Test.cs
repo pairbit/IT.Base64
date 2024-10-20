@@ -9,14 +9,11 @@ public abstract class Base64Test
 {
     protected readonly Base64Encoder _encoder;
     protected readonly Base64Decoder _decoder;
-    protected readonly byte[] _bytes;
 
     public Base64Test(Base64Encoder encoder, Base64Decoder decoder)
     {
         _encoder = encoder;
         _decoder = decoder;
-
-        _bytes = _encoder.Bytes.ToArray();
     }
 
     [Test]
@@ -196,7 +193,7 @@ public abstract class Base64Test
         Assert.That(chars[1], Is.EqualTo(char1));
 
         Int16 int16 = default;
-        UnsafeBase64.Encode8(_bytes, ref value, ref Unsafe.As<short, byte>(ref int16));
+        UnsafeBase64.Encode8(ref MemoryMarshal.GetReference(_encoder.Bytes.Span), ref value, ref Unsafe.As<short, byte>(ref int16));
         Assert.That(_encoder.Encode8ToInt16(value), Is.EqualTo(int16));
         Assert.That(Base64Encoded.ToString(int16), Is.EqualTo(str));
         Assert.That(Base64Encoded.ToString((ushort)int16), Is.EqualTo(str));
@@ -537,7 +534,7 @@ public abstract class Base64Test
         Assert.That(invalidByte, Is.EqualTo(default(byte)));
 
         Int32 int32 = default;
-        UnsafeBase64.Encode24(_bytes, ref Unsafe.As<T, byte>(ref value), ref Unsafe.As<int, byte>(ref int32));
+        UnsafeBase64.Encode24(ref MemoryMarshal.GetReference(_encoder.Bytes.Span), ref Unsafe.As<T, byte>(ref value), ref Unsafe.As<int, byte>(ref int32));
         Assert.That(_encoder.Encode24ToInt32(value), Is.EqualTo(int32));
         Assert.That(Base64Encoded.ToString(int32), Is.EqualTo(str));
         Assert.That(Base64Encoded.ToString((uint)int32), Is.EqualTo(str));
