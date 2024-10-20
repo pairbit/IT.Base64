@@ -128,22 +128,35 @@ public class Base64UrlTest : Base64Test
     {
         var encoded = base.Test(bytes, hasPadding);
 
+        var encodedLength = gfoidl.Base64.Base64.Url.GetEncodedLength(bytes.Length);
+
+        Span<byte> utf8 = stackalloc byte[encodedLength];
+
+        var status = gfoidl.Base64.Base64.Url.Encode(bytes, utf8, out var consumed, out var written);
+
+        Assert.That(status, Is.EqualTo(OperationStatus.Done));
+        Assert.That(consumed, Is.EqualTo(bytes.Length));
+
         if (hasPadding)
         {
+            var paddingLength = Base64Encoder.GetPaddingLength(bytes.Length);
 
+            var len = encoded.Length - paddingLength;
+
+            Assert.That(len, Is.EqualTo(encodedLength));
+            Assert.That(encoded[..len].SequenceEqual(utf8), Is.True);
+            Assert.That(written, Is.EqualTo(len));
+
+            var pads = encoded[len..];
+            for (int i = 0; i < pads.Length; i++)
+            {
+                Assert.That(pads[i], Is.EqualTo((byte)'='));
+            }
         }
         else
         {
-            Assert.That(encoded.Length, Is.EqualTo(gfoidl.Base64.Base64.Url.GetEncodedLength(bytes.Length)));
-
-            Span<byte> utf8 = stackalloc byte[encoded.Length];
-
-            var status = gfoidl.Base64.Base64.Url.Encode(bytes, utf8, out var consumed, out var written);
-
-            Assert.That(status, Is.EqualTo(OperationStatus.Done));
-            Assert.That(consumed, Is.EqualTo(bytes.Length));
-            Assert.That(written, Is.EqualTo(encoded.Length));
-
+            Assert.That(encoded.Length, Is.EqualTo(encodedLength));
+            Assert.That(written, Is.EqualTo(encodedLength));
             Assert.That(encoded.SequenceEqual(utf8), Is.True);
         }
 
