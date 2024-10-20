@@ -792,62 +792,62 @@ public class Base64Decoder
 
     #region Decode128
 
-    public EncodingStatus TryDecode128(ReadOnlySpan<byte> encoded, out Int128 value)
+    public DecodingStatus TryDecode128(ReadOnlySpan<byte> encoded, out Int128 value)
     {
         value = default;
-        if (encoded.Length != 22) return EncodingStatus.InvalidDataLength;
+        if (encoded.Length != 22) return DecodingStatus.InvalidDataLength;
 
         if (!UnsafeBase64.TryDecode128(_map, ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<Int128, byte>(ref value)))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
-    public EncodingStatus TryDecode128(ReadOnlySpan<char> encoded, out Int128 value)
+    public DecodingStatus TryDecode128(ReadOnlySpan<char> encoded, out Int128 value)
     {
         value = default;
-        if (encoded.Length != 22) return EncodingStatus.InvalidDataLength;
+        if (encoded.Length != 22) return DecodingStatus.InvalidDataLength;
 
         if (!UnsafeBase64.TryDecode128(_map, ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<Int128, byte>(ref value)))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
-    public EncodingStatus TryDecode128(ReadOnlySpan<byte> encoded, out Int128 value, out byte invalid)
+    public DecodingStatus TryDecode128(ReadOnlySpan<byte> encoded, out Int128 value, out byte invalid)
     {
         value = default;
         if (encoded.Length != 22)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
         if (!UnsafeBase64.TryDecode128(_map, ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<Int128, byte>(ref value), out invalid))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
-    public EncodingStatus TryDecode128(ReadOnlySpan<char> encoded, out Int128 value, out char invalid)
+    public DecodingStatus TryDecode128(ReadOnlySpan<char> encoded, out Int128 value, out char invalid)
     {
         value = default;
         if (encoded.Length != 22)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
         if (!UnsafeBase64.TryDecode128(_map, ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<Int128, byte>(ref value), out invalid))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
     /// <exception cref="ArgumentOutOfRangeException"/>
@@ -878,36 +878,36 @@ public class Base64Decoder
 
     #region Valid128
 
-    public EncodingStatus TryValid128(ReadOnlySpan<byte> encoded)
+    public DecodingStatus TryValid128(ReadOnlySpan<byte> encoded)
     {
-        if (encoded.Length != 22) return EncodingStatus.InvalidDataLength;
-        return UnsafeBase64.IsValid128(_map, ref MemoryMarshal.GetReference(encoded)) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        if (encoded.Length != 22) return DecodingStatus.InvalidDataLength;
+        return UnsafeBase64.IsValid128(_map, ref MemoryMarshal.GetReference(encoded)) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
-    public EncodingStatus TryValid128(ReadOnlySpan<char> encoded)
+    public DecodingStatus TryValid128(ReadOnlySpan<char> encoded)
     {
-        if (encoded.Length != 22) return EncodingStatus.InvalidDataLength;
-        return UnsafeBase64.IsValid128(_map, ref MemoryMarshal.GetReference(encoded)) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        if (encoded.Length != 22) return DecodingStatus.InvalidDataLength;
+        return UnsafeBase64.IsValid128(_map, ref MemoryMarshal.GetReference(encoded)) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
-    public EncodingStatus TryValid128(ReadOnlySpan<byte> encoded, out byte invalid)
+    public DecodingStatus TryValid128(ReadOnlySpan<byte> encoded, out byte invalid)
     {
         if (encoded.Length != 22)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
-        return UnsafeBase64.IsValid128(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        return UnsafeBase64.IsValid128(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
-    public EncodingStatus TryValid128(ReadOnlySpan<char> encoded, out char invalid)
+    public DecodingStatus TryValid128(ReadOnlySpan<char> encoded, out char invalid)
     {
         if (encoded.Length != 22)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
-        return UnsafeBase64.IsValid128(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        return UnsafeBase64.IsValid128(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
     /// <exception cref="ArgumentOutOfRangeException"/>
@@ -930,74 +930,74 @@ public class Base64Decoder
 
     #region Decode72
 
-    public EncodingStatus TryDecode72<T>(ReadOnlySpan<byte> encoded, out T value) where T : unmanaged
+    public DecodingStatus TryDecode72<T>(ReadOnlySpan<byte> encoded, out T value) where T : unmanaged
     {
         value = default;
-        if (encoded.Length != 12) return EncodingStatus.InvalidDataLength;
-        if (Unsafe.SizeOf<T>() != 9) return EncodingStatus.InvalidDestinationLength;
+        if (encoded.Length != 12) return DecodingStatus.InvalidDataLength;
+        if (Unsafe.SizeOf<T>() != 9) return DecodingStatus.InvalidDestinationLength;
 
         if (!UnsafeBase64.TryDecode72(_map, ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<T, byte>(ref value)))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
-    public EncodingStatus TryDecode72<T>(ReadOnlySpan<char> encoded, out T value) where T : unmanaged
+    public DecodingStatus TryDecode72<T>(ReadOnlySpan<char> encoded, out T value) where T : unmanaged
     {
         value = default;
-        if (encoded.Length != 12) return EncodingStatus.InvalidDataLength;
-        if (Unsafe.SizeOf<T>() != 9) return EncodingStatus.InvalidDestinationLength;
+        if (encoded.Length != 12) return DecodingStatus.InvalidDataLength;
+        if (Unsafe.SizeOf<T>() != 9) return DecodingStatus.InvalidDestinationLength;
 
         if (!UnsafeBase64.TryDecode72(_map, ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<T, byte>(ref value)))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
-    public EncodingStatus TryDecode72<T>(ReadOnlySpan<byte> encoded, out T value, out byte invalid) where T : unmanaged
+    public DecodingStatus TryDecode72<T>(ReadOnlySpan<byte> encoded, out T value, out byte invalid) where T : unmanaged
     {
         value = default;
         if (encoded.Length != 12)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
         if (Unsafe.SizeOf<T>() != 9)
         {
             invalid = default;
-            return EncodingStatus.InvalidDestinationLength;
+            return DecodingStatus.InvalidDestinationLength;
         }
         if (!UnsafeBase64.TryDecode72(_map, ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<T, byte>(ref value), out invalid))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
-    public EncodingStatus TryDecode72<T>(ReadOnlySpan<char> encoded, out T value, out char invalid) where T : unmanaged
+    public DecodingStatus TryDecode72<T>(ReadOnlySpan<char> encoded, out T value, out char invalid) where T : unmanaged
     {
         value = default;
         if (encoded.Length != 12)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
         if (Unsafe.SizeOf<T>() != 9)
         {
             invalid = default;
-            return EncodingStatus.InvalidDestinationLength;
+            return DecodingStatus.InvalidDestinationLength;
         }
         if (!UnsafeBase64.TryDecode72(_map, ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<T, byte>(ref value), out invalid))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
     /// <exception cref="ArgumentOutOfRangeException"/>
@@ -1030,36 +1030,36 @@ public class Base64Decoder
 
     #region Valid72
 
-    public EncodingStatus TryValid72(ReadOnlySpan<byte> encoded)
+    public DecodingStatus TryValid72(ReadOnlySpan<byte> encoded)
     {
-        if (encoded.Length != 12) return EncodingStatus.InvalidDataLength;
-        return UnsafeBase64.IsValid72(_map, ref MemoryMarshal.GetReference(encoded)) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        if (encoded.Length != 12) return DecodingStatus.InvalidDataLength;
+        return UnsafeBase64.IsValid72(_map, ref MemoryMarshal.GetReference(encoded)) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
-    public EncodingStatus TryValid72(ReadOnlySpan<char> encoded)
+    public DecodingStatus TryValid72(ReadOnlySpan<char> encoded)
     {
-        if (encoded.Length != 12) return EncodingStatus.InvalidDataLength;
-        return UnsafeBase64.IsValid72(_map, ref MemoryMarshal.GetReference(encoded)) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        if (encoded.Length != 12) return DecodingStatus.InvalidDataLength;
+        return UnsafeBase64.IsValid72(_map, ref MemoryMarshal.GetReference(encoded)) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
-    public EncodingStatus TryValid72(ReadOnlySpan<byte> encoded, out byte invalid)
+    public DecodingStatus TryValid72(ReadOnlySpan<byte> encoded, out byte invalid)
     {
         if (encoded.Length != 12)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
-        return UnsafeBase64.IsValid72(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        return UnsafeBase64.IsValid72(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
-    public EncodingStatus TryValid72(ReadOnlySpan<char> encoded, out char invalid)
+    public DecodingStatus TryValid72(ReadOnlySpan<char> encoded, out char invalid)
     {
         if (encoded.Length != 12)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
-        return UnsafeBase64.IsValid72(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        return UnsafeBase64.IsValid72(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
     /// <exception cref="ArgumentOutOfRangeException"/>
@@ -1082,62 +1082,62 @@ public class Base64Decoder
 
     #region Decode64
 
-    public EncodingStatus TryDecode64(ReadOnlySpan<byte> encoded, out ulong value)
+    public DecodingStatus TryDecode64(ReadOnlySpan<byte> encoded, out ulong value)
     {
         value = default;
-        if (encoded.Length != 11) return EncodingStatus.InvalidDataLength;
+        if (encoded.Length != 11) return DecodingStatus.InvalidDataLength;
 
         if (!UnsafeBase64.TryDecode64(_map, ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<ulong, byte>(ref value)))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
-    public EncodingStatus TryDecode64(ReadOnlySpan<char> encoded, out ulong value)
+    public DecodingStatus TryDecode64(ReadOnlySpan<char> encoded, out ulong value)
     {
         value = default;
-        if (encoded.Length != 11) return EncodingStatus.InvalidDataLength;
+        if (encoded.Length != 11) return DecodingStatus.InvalidDataLength;
 
         if (!UnsafeBase64.TryDecode64(_map, ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<ulong, byte>(ref value)))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
-    public EncodingStatus TryDecode64(ReadOnlySpan<byte> encoded, out ulong value, out byte invalid)
+    public DecodingStatus TryDecode64(ReadOnlySpan<byte> encoded, out ulong value, out byte invalid)
     {
         value = default;
         if (encoded.Length != 11)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
         if (!UnsafeBase64.TryDecode64(_map, ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<ulong, byte>(ref value), out invalid))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
-    public EncodingStatus TryDecode64(ReadOnlySpan<char> encoded, out ulong value, out char invalid)
+    public DecodingStatus TryDecode64(ReadOnlySpan<char> encoded, out ulong value, out char invalid)
     {
         value = default;
         if (encoded.Length != 11)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
         if (!UnsafeBase64.TryDecode64(_map, ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<ulong, byte>(ref value), out invalid))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
     /// <exception cref="ArgumentOutOfRangeException"/>
@@ -1168,36 +1168,36 @@ public class Base64Decoder
 
     #region Valid64
 
-    public EncodingStatus TryValid64(ReadOnlySpan<byte> encoded)
+    public DecodingStatus TryValid64(ReadOnlySpan<byte> encoded)
     {
-        if (encoded.Length != 11) return EncodingStatus.InvalidDataLength;
-        return UnsafeBase64.IsValid64(_map, ref MemoryMarshal.GetReference(encoded)) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        if (encoded.Length != 11) return DecodingStatus.InvalidDataLength;
+        return UnsafeBase64.IsValid64(_map, ref MemoryMarshal.GetReference(encoded)) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
-    public EncodingStatus TryValid64(ReadOnlySpan<char> encoded)
+    public DecodingStatus TryValid64(ReadOnlySpan<char> encoded)
     {
-        if (encoded.Length != 11) return EncodingStatus.InvalidDataLength;
-        return UnsafeBase64.IsValid64(_map, ref MemoryMarshal.GetReference(encoded)) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        if (encoded.Length != 11) return DecodingStatus.InvalidDataLength;
+        return UnsafeBase64.IsValid64(_map, ref MemoryMarshal.GetReference(encoded)) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
-    public EncodingStatus TryValid64(ReadOnlySpan<byte> encoded, out byte invalid)
+    public DecodingStatus TryValid64(ReadOnlySpan<byte> encoded, out byte invalid)
     {
         if (encoded.Length != 11)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
-        return UnsafeBase64.IsValid64(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        return UnsafeBase64.IsValid64(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
-    public EncodingStatus TryValid64(ReadOnlySpan<char> encoded, out char invalid)
+    public DecodingStatus TryValid64(ReadOnlySpan<char> encoded, out char invalid)
     {
         if (encoded.Length != 11)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
-        return UnsafeBase64.IsValid64(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        return UnsafeBase64.IsValid64(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
     /// <exception cref="ArgumentOutOfRangeException"/>
@@ -1220,62 +1220,62 @@ public class Base64Decoder
 
     #region Decode32
 
-    public EncodingStatus TryDecode32(ReadOnlySpan<byte> encoded, out uint value)
+    public DecodingStatus TryDecode32(ReadOnlySpan<byte> encoded, out uint value)
     {
         value = default;
-        if (encoded.Length != 6) return EncodingStatus.InvalidDataLength;
+        if (encoded.Length != 6) return DecodingStatus.InvalidDataLength;
 
         if (!UnsafeBase64.TryDecode32(_map, ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<uint, byte>(ref value)))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
-    public EncodingStatus TryDecode32(ReadOnlySpan<char> encoded, out uint value)
+    public DecodingStatus TryDecode32(ReadOnlySpan<char> encoded, out uint value)
     {
         value = default;
-        if (encoded.Length != 6) return EncodingStatus.InvalidDataLength;
+        if (encoded.Length != 6) return DecodingStatus.InvalidDataLength;
 
         if (!UnsafeBase64.TryDecode32(_map, ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<uint, byte>(ref value)))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
-    public EncodingStatus TryDecode32(ReadOnlySpan<byte> encoded, out uint value, out byte invalid)
+    public DecodingStatus TryDecode32(ReadOnlySpan<byte> encoded, out uint value, out byte invalid)
     {
         value = default;
         if (encoded.Length != 6)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
         if (!UnsafeBase64.TryDecode32(_map, ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<uint, byte>(ref value), out invalid))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
-    public EncodingStatus TryDecode32(ReadOnlySpan<char> encoded, out uint value, out char invalid)
+    public DecodingStatus TryDecode32(ReadOnlySpan<char> encoded, out uint value, out char invalid)
     {
         value = default;
         if (encoded.Length != 6)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
         if (!UnsafeBase64.TryDecode32(_map, ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<uint, byte>(ref value), out invalid))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
     /// <exception cref="ArgumentOutOfRangeException"/>
@@ -1306,36 +1306,36 @@ public class Base64Decoder
 
     #region Valid32
 
-    public EncodingStatus TryValid32(ReadOnlySpan<byte> encoded)
+    public DecodingStatus TryValid32(ReadOnlySpan<byte> encoded)
     {
-        if (encoded.Length != 6) return EncodingStatus.InvalidDataLength;
-        return UnsafeBase64.IsValid32(_map, ref MemoryMarshal.GetReference(encoded)) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        if (encoded.Length != 6) return DecodingStatus.InvalidDataLength;
+        return UnsafeBase64.IsValid32(_map, ref MemoryMarshal.GetReference(encoded)) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
-    public EncodingStatus TryValid32(ReadOnlySpan<char> encoded)
+    public DecodingStatus TryValid32(ReadOnlySpan<char> encoded)
     {
-        if (encoded.Length != 6) return EncodingStatus.InvalidDataLength;
-        return UnsafeBase64.IsValid32(_map, ref MemoryMarshal.GetReference(encoded)) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        if (encoded.Length != 6) return DecodingStatus.InvalidDataLength;
+        return UnsafeBase64.IsValid32(_map, ref MemoryMarshal.GetReference(encoded)) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
-    public EncodingStatus TryValid32(ReadOnlySpan<byte> encoded, out byte invalid)
+    public DecodingStatus TryValid32(ReadOnlySpan<byte> encoded, out byte invalid)
     {
         if (encoded.Length != 6)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
-        return UnsafeBase64.IsValid32(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        return UnsafeBase64.IsValid32(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
-    public EncodingStatus TryValid32(ReadOnlySpan<char> encoded, out char invalid)
+    public DecodingStatus TryValid32(ReadOnlySpan<char> encoded, out char invalid)
     {
         if (encoded.Length != 6)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
-        return UnsafeBase64.IsValid32(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        return UnsafeBase64.IsValid32(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
     /// <exception cref="ArgumentOutOfRangeException"/>
@@ -1358,74 +1358,74 @@ public class Base64Decoder
 
     #region Decode24
 
-    public EncodingStatus TryDecode24<T>(ReadOnlySpan<byte> encoded, out T value) where T : unmanaged
+    public DecodingStatus TryDecode24<T>(ReadOnlySpan<byte> encoded, out T value) where T : unmanaged
     {
         value = default;
-        if (encoded.Length != 4) return EncodingStatus.InvalidDataLength;
-        if (Unsafe.SizeOf<T>() != 3) return EncodingStatus.InvalidDestinationLength;
+        if (encoded.Length != 4) return DecodingStatus.InvalidDataLength;
+        if (Unsafe.SizeOf<T>() != 3) return DecodingStatus.InvalidDestinationLength;
 
         if (!UnsafeBase64.TryDecode24(_map, ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<T, byte>(ref value)))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
-    public EncodingStatus TryDecode24<T>(ReadOnlySpan<char> encoded, out T value) where T : unmanaged
+    public DecodingStatus TryDecode24<T>(ReadOnlySpan<char> encoded, out T value) where T : unmanaged
     {
         value = default;
-        if (encoded.Length != 4) return EncodingStatus.InvalidDataLength;
-        if (Unsafe.SizeOf<T>() != 3) return EncodingStatus.InvalidDestinationLength;
+        if (encoded.Length != 4) return DecodingStatus.InvalidDataLength;
+        if (Unsafe.SizeOf<T>() != 3) return DecodingStatus.InvalidDestinationLength;
 
         if (!UnsafeBase64.TryDecode24(_map, ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<T, byte>(ref value)))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
-    public EncodingStatus TryDecode24<T>(ReadOnlySpan<byte> encoded, out T value, out byte invalid) where T : unmanaged
+    public DecodingStatus TryDecode24<T>(ReadOnlySpan<byte> encoded, out T value, out byte invalid) where T : unmanaged
     {
         value = default;
         if (encoded.Length != 4)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
         if (Unsafe.SizeOf<T>() != 3)
         {
             invalid = default;
-            return EncodingStatus.InvalidDestinationLength;
+            return DecodingStatus.InvalidDestinationLength;
         }
         if (!UnsafeBase64.TryDecode24(_map, ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<T, byte>(ref value), out invalid))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
-    public EncodingStatus TryDecode24<T>(ReadOnlySpan<char> encoded, out T value, out char invalid) where T : unmanaged
+    public DecodingStatus TryDecode24<T>(ReadOnlySpan<char> encoded, out T value, out char invalid) where T : unmanaged
     {
         value = default;
         if (encoded.Length != 4)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
         if (Unsafe.SizeOf<T>() != 3)
         {
             invalid = default;
-            return EncodingStatus.InvalidDestinationLength;
+            return DecodingStatus.InvalidDestinationLength;
         }
         if (!UnsafeBase64.TryDecode24(_map, ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<T, byte>(ref value), out invalid))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
     /// <exception cref="ArgumentOutOfRangeException"/>
@@ -1458,36 +1458,36 @@ public class Base64Decoder
 
     #region Valid24
 
-    public EncodingStatus TryValid24(ReadOnlySpan<byte> encoded)
+    public DecodingStatus TryValid24(ReadOnlySpan<byte> encoded)
     {
-        if (encoded.Length != 4) return EncodingStatus.InvalidDataLength;
-        return UnsafeBase64.IsValid24(_map, ref MemoryMarshal.GetReference(encoded)) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        if (encoded.Length != 4) return DecodingStatus.InvalidDataLength;
+        return UnsafeBase64.IsValid24(_map, ref MemoryMarshal.GetReference(encoded)) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
-    public EncodingStatus TryValid24(ReadOnlySpan<char> encoded)
+    public DecodingStatus TryValid24(ReadOnlySpan<char> encoded)
     {
-        if (encoded.Length != 4) return EncodingStatus.InvalidDataLength;
-        return UnsafeBase64.IsValid24(_map, ref MemoryMarshal.GetReference(encoded)) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        if (encoded.Length != 4) return DecodingStatus.InvalidDataLength;
+        return UnsafeBase64.IsValid24(_map, ref MemoryMarshal.GetReference(encoded)) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
-    public EncodingStatus TryValid24(ReadOnlySpan<byte> encoded, out byte invalid)
+    public DecodingStatus TryValid24(ReadOnlySpan<byte> encoded, out byte invalid)
     {
         if (encoded.Length != 4)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
-        return UnsafeBase64.IsValid24(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        return UnsafeBase64.IsValid24(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
-    public EncodingStatus TryValid24(ReadOnlySpan<char> encoded, out char invalid)
+    public DecodingStatus TryValid24(ReadOnlySpan<char> encoded, out char invalid)
     {
         if (encoded.Length != 4)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
-        return UnsafeBase64.IsValid24(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        return UnsafeBase64.IsValid24(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
     /// <exception cref="ArgumentOutOfRangeException"/>
@@ -1510,62 +1510,62 @@ public class Base64Decoder
 
     #region Decode16
 
-    public EncodingStatus TryDecode16(ReadOnlySpan<byte> encoded, out ushort value)
+    public DecodingStatus TryDecode16(ReadOnlySpan<byte> encoded, out ushort value)
     {
         value = default;
-        if (encoded.Length != 3) return EncodingStatus.InvalidDataLength;
+        if (encoded.Length != 3) return DecodingStatus.InvalidDataLength;
 
         if (!UnsafeBase64.TryDecode16(_map, ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<ushort, byte>(ref value)))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
-    public EncodingStatus TryDecode16(ReadOnlySpan<char> encoded, out ushort value)
+    public DecodingStatus TryDecode16(ReadOnlySpan<char> encoded, out ushort value)
     {
         value = default;
-        if (encoded.Length != 3) return EncodingStatus.InvalidDataLength;
+        if (encoded.Length != 3) return DecodingStatus.InvalidDataLength;
 
         if (!UnsafeBase64.TryDecode16(_map, ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<ushort, byte>(ref value)))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
-    public EncodingStatus TryDecode16(ReadOnlySpan<byte> encoded, out ushort value, out byte invalid)
+    public DecodingStatus TryDecode16(ReadOnlySpan<byte> encoded, out ushort value, out byte invalid)
     {
         value = default;
         if (encoded.Length != 3)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
         if (!UnsafeBase64.TryDecode16(_map, ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<ushort, byte>(ref value), out invalid))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
-    public EncodingStatus TryDecode16(ReadOnlySpan<char> encoded, out ushort value, out char invalid)
+    public DecodingStatus TryDecode16(ReadOnlySpan<char> encoded, out ushort value, out char invalid)
     {
         value = default;
         if (encoded.Length != 3)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
         if (!UnsafeBase64.TryDecode16(_map, ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<ushort, byte>(ref value), out invalid))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
     /// <exception cref="ArgumentOutOfRangeException"/>
@@ -1596,36 +1596,36 @@ public class Base64Decoder
 
     #region Valid16
 
-    public EncodingStatus TryValid16(ReadOnlySpan<byte> encoded)
+    public DecodingStatus TryValid16(ReadOnlySpan<byte> encoded)
     {
-        if (encoded.Length != 3) return EncodingStatus.InvalidDataLength;
-        return UnsafeBase64.IsValid16(_map, ref MemoryMarshal.GetReference(encoded)) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        if (encoded.Length != 3) return DecodingStatus.InvalidDataLength;
+        return UnsafeBase64.IsValid16(_map, ref MemoryMarshal.GetReference(encoded)) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
-    public EncodingStatus TryValid16(ReadOnlySpan<char> encoded)
+    public DecodingStatus TryValid16(ReadOnlySpan<char> encoded)
     {
-        if (encoded.Length != 3) return EncodingStatus.InvalidDataLength;
-        return UnsafeBase64.IsValid16(_map, ref MemoryMarshal.GetReference(encoded)) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        if (encoded.Length != 3) return DecodingStatus.InvalidDataLength;
+        return UnsafeBase64.IsValid16(_map, ref MemoryMarshal.GetReference(encoded)) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
-    public EncodingStatus TryValid16(ReadOnlySpan<byte> encoded, out byte invalid)
+    public DecodingStatus TryValid16(ReadOnlySpan<byte> encoded, out byte invalid)
     {
         if (encoded.Length != 3)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
-        return UnsafeBase64.IsValid16(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        return UnsafeBase64.IsValid16(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
-    public EncodingStatus TryValid16(ReadOnlySpan<char> encoded, out char invalid)
+    public DecodingStatus TryValid16(ReadOnlySpan<char> encoded, out char invalid)
     {
         if (encoded.Length != 3)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
-        return UnsafeBase64.IsValid16(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        return UnsafeBase64.IsValid16(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
     /// <exception cref="ArgumentOutOfRangeException"/>
@@ -1648,62 +1648,62 @@ public class Base64Decoder
 
     #region Decode8
 
-    public EncodingStatus TryDecode8(ReadOnlySpan<byte> encoded, out byte value)
+    public DecodingStatus TryDecode8(ReadOnlySpan<byte> encoded, out byte value)
     {
         value = default;
-        if (encoded.Length != 2) return EncodingStatus.InvalidDataLength;
+        if (encoded.Length != 2) return DecodingStatus.InvalidDataLength;
 
         if (!UnsafeBase64.TryDecode8(_map, ref MemoryMarshal.GetReference(encoded), ref value))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
-    public EncodingStatus TryDecode8(ReadOnlySpan<char> encoded, out byte value)
+    public DecodingStatus TryDecode8(ReadOnlySpan<char> encoded, out byte value)
     {
         value = default;
-        if (encoded.Length != 2) return EncodingStatus.InvalidDataLength;
+        if (encoded.Length != 2) return DecodingStatus.InvalidDataLength;
 
         if (!UnsafeBase64.TryDecode8(_map, ref MemoryMarshal.GetReference(encoded), ref value))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
-    public EncodingStatus TryDecode8(ReadOnlySpan<byte> encoded, out byte value, out byte invalid)
+    public DecodingStatus TryDecode8(ReadOnlySpan<byte> encoded, out byte value, out byte invalid)
     {
         value = default;
         if (encoded.Length != 2)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
         if (!UnsafeBase64.TryDecode8(_map, ref MemoryMarshal.GetReference(encoded), ref value, out invalid))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
-    public EncodingStatus TryDecode8(ReadOnlySpan<char> encoded, out byte value, out char invalid)
+    public DecodingStatus TryDecode8(ReadOnlySpan<char> encoded, out byte value, out char invalid)
     {
         value = default;
         if (encoded.Length != 2)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
         if (!UnsafeBase64.TryDecode8(_map, ref MemoryMarshal.GetReference(encoded), ref value, out invalid))
         {
             value = default;
-            return EncodingStatus.InvalidData;
+            return DecodingStatus.InvalidData;
         }
-        return EncodingStatus.Done;
+        return DecodingStatus.Done;
     }
 
     /// <exception cref="ArgumentOutOfRangeException"/>
@@ -1734,36 +1734,36 @@ public class Base64Decoder
 
     #region Valid8
 
-    public EncodingStatus TryValid8(ReadOnlySpan<byte> encoded)
+    public DecodingStatus TryValid8(ReadOnlySpan<byte> encoded)
     {
-        if (encoded.Length != 2) return EncodingStatus.InvalidDataLength;
-        return UnsafeBase64.IsValid8(_map, ref MemoryMarshal.GetReference(encoded)) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        if (encoded.Length != 2) return DecodingStatus.InvalidDataLength;
+        return UnsafeBase64.IsValid8(_map, ref MemoryMarshal.GetReference(encoded)) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
-    public EncodingStatus TryValid8(ReadOnlySpan<char> encoded)
+    public DecodingStatus TryValid8(ReadOnlySpan<char> encoded)
     {
-        if (encoded.Length != 2) return EncodingStatus.InvalidDataLength;
-        return UnsafeBase64.IsValid8(_map, ref MemoryMarshal.GetReference(encoded)) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        if (encoded.Length != 2) return DecodingStatus.InvalidDataLength;
+        return UnsafeBase64.IsValid8(_map, ref MemoryMarshal.GetReference(encoded)) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
-    public EncodingStatus TryValid8(ReadOnlySpan<byte> encoded, out byte invalid)
+    public DecodingStatus TryValid8(ReadOnlySpan<byte> encoded, out byte invalid)
     {
         if (encoded.Length != 2)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
-        return UnsafeBase64.IsValid8(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        return UnsafeBase64.IsValid8(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
-    public EncodingStatus TryValid8(ReadOnlySpan<char> encoded, out char invalid)
+    public DecodingStatus TryValid8(ReadOnlySpan<char> encoded, out char invalid)
     {
         if (encoded.Length != 2)
         {
             invalid = default;
-            return EncodingStatus.InvalidDataLength;
+            return DecodingStatus.InvalidDataLength;
         }
-        return UnsafeBase64.IsValid8(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? EncodingStatus.Done : EncodingStatus.InvalidData;
+        return UnsafeBase64.IsValid8(_map, ref MemoryMarshal.GetReference(encoded), out invalid) ? DecodingStatus.Done : DecodingStatus.InvalidData;
     }
 
     /// <exception cref="ArgumentOutOfRangeException"/>

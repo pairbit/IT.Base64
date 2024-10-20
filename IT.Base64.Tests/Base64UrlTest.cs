@@ -25,13 +25,13 @@ public class Base64UrlTest : Base64Test
         Assert.That(_decoder.Decode8("-w"), Is.EqualTo(251));
         Assert.That(_decoder.Decode8("-_"), Is.EqualTo(251));
 
-        Assert.That(_decoder.TryValid8("-/", out var invalid), Is.EqualTo(EncodingStatus.InvalidData));
+        Assert.That(_decoder.TryValid8("-/", out var invalid), Is.EqualTo(DecodingStatus.InvalidData));
         Assert.That(invalid, Is.EqualTo('/'));
 
-        Assert.That(_decoder.TryValid8("+_", out invalid), Is.EqualTo(EncodingStatus.InvalidData));
+        Assert.That(_decoder.TryValid8("+_", out invalid), Is.EqualTo(DecodingStatus.InvalidData));
         Assert.That(invalid, Is.EqualTo('+'));
 
-        Assert.That(_decoder.TryValid8("+/"), Is.EqualTo(EncodingStatus.InvalidData));
+        Assert.That(_decoder.TryValid8("+/"), Is.EqualTo(DecodingStatus.InvalidData));
     }
 
     [Test]

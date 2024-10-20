@@ -16,12 +16,12 @@ public class Base64DefaultTest : Base64Test
         Assert.That(_decoder.Decode8("+w"), Is.EqualTo(251));
         Assert.That(_decoder.Decode8("+/"), Is.EqualTo(251));
 
-        Assert.That(_decoder.TryValid8("+_", out var invalid), Is.EqualTo(EncodingStatus.InvalidData));
+        Assert.That(_decoder.TryValid8("+_", out var invalid), Is.EqualTo(DecodingStatus.InvalidData));
         Assert.That(invalid, Is.EqualTo('_'));
 
-        Assert.That(_decoder.TryValid8("-/", out invalid), Is.EqualTo(EncodingStatus.InvalidData));
+        Assert.That(_decoder.TryValid8("-/", out invalid), Is.EqualTo(DecodingStatus.InvalidData));
         Assert.That(invalid, Is.EqualTo('-'));
 
-        Assert.That(_decoder.TryValid8("-/"), Is.EqualTo(EncodingStatus.InvalidData));
+        Assert.That(_decoder.TryValid8("-/"), Is.EqualTo(DecodingStatus.InvalidData));
     }
 }

@@ -7,9 +7,9 @@ public class Base64DefaultAnyTest : Base64Test
     [Test]
     public void Test8DefaultAny()
     {
-        Assert.That(_decoder.TryValid8("-/"), Is.EqualTo(EncodingStatus.Done));
+        Assert.That(_decoder.TryValid8("-/"), Is.EqualTo(DecodingStatus.Done));
 
-        Assert.That(_decoder.TryValid8("+_", out var invalid), Is.EqualTo(EncodingStatus.Done));
+        Assert.That(_decoder.TryValid8("+_", out var invalid), Is.EqualTo(DecodingStatus.Done));
         Assert.That(invalid, Is.EqualTo('\0'));
     }
 }
