@@ -8,8 +8,8 @@ namespace IT.Base64;
 
 public class Base64Encoder
 {
-    public static readonly Base64Encoder Default = new("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
-    public static readonly Base64Encoder Url = new("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_");
+    public static readonly Base64Encoder Default = new("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"u8);
+    public static readonly Base64Encoder Url = new("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"u8);
 
     public const int MaxDataLength = int.MaxValue / 4 * 3; // 1610612733
 
@@ -22,12 +22,15 @@ public class Base64Encoder
 
     public ReadOnlyMemory<byte> Bytes => _bytes;
 
-    public Base64Encoder(string encoding)
+    public Base64Encoder(ReadOnlySpan<byte> bytes)
     {
-        Encoding = encoding ?? throw new ArgumentNullException(nameof(encoding));
+        if (bytes.Length != 64) throw new ArgumentOutOfRangeException(nameof(bytes), bytes.Length, "length != 64");
 
-        _chars = encoding.ToCharArray();
-        _bytes = System.Text.Encoding.UTF8.GetBytes(Encoding);
+        var array = bytes.ToArray();
+
+        _bytes = array;
+        _chars = System.Text.Encoding.UTF8.GetChars(array);
+        Encoding = System.Text.Encoding.UTF8.GetString(bytes);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
