@@ -101,6 +101,7 @@ public abstract class Base64Test
             random.NextBytes(bytes);
 
             Test(bytes, hasPadding: true);
+            Test(bytes, hasPadding: false);
         }
     }
 

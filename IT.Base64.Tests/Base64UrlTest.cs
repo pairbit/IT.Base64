@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Buffers;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace IT.Base64.Tests;
@@ -121,5 +122,31 @@ public class Base64UrlTest : Base64Test
         value = new Int128(10468201550123809991, 12468201550123822335);
         Assert.That(_encoder.Encode128ToString(value), Is.EqualTo("_-waH0DzB63HvFLQ2IVGkQ"));
         Assert.That(_decoder.Decode128("_-waH0DzB63HvFLQ2IVGkQ"), Is.EqualTo(value));
+    }
+
+    protected override ReadOnlySpan<byte> Test(ReadOnlySpan<byte> bytes, bool hasPadding)
+    {
+        var encoded = base.Test(bytes, hasPadding);
+
+        if (hasPadding)
+        {
+
+        }
+        else
+        {
+            Assert.That(encoded.Length, Is.EqualTo(gfoidl.Base64.Base64.Url.GetEncodedLength(bytes.Length)));
+
+            Span<byte> utf8 = stackalloc byte[encoded.Length];
+
+            var status = gfoidl.Base64.Base64.Url.Encode(bytes, utf8, out var consumed, out var written);
+
+            Assert.That(status, Is.EqualTo(OperationStatus.Done));
+            Assert.That(consumed, Is.EqualTo(bytes.Length));
+            Assert.That(written, Is.EqualTo(encoded.Length));
+
+            Assert.That(encoded.SequenceEqual(utf8), Is.True);
+        }
+
+        return encoded;
     }
 }
