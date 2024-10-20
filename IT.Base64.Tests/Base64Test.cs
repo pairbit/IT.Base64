@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -84,6 +85,22 @@ public abstract class Base64Test
         for (var i = 0; i < 100; i++)
         {
             Test128(new Int128((ulong)random.NextInt64(), (ulong)random.NextInt64()));
+        }
+    }
+
+    [Test]
+    public void Test()
+    {
+        var random = Random.Shared;
+        for (int i = 0; i < 100; i++)
+        {
+            var len = random.Next(128, 1000);
+
+            var bytes = new byte[len];
+
+            random.NextBytes(bytes);
+
+            Test(bytes, hasPadding: true);
         }
     }
 
@@ -1207,5 +1224,23 @@ public abstract class Base64Test
             Assert.That(invalidChar, Is.EqualTo((char)offset));
             offset++;
         }
+    }
+
+    protected virtual ReadOnlySpan<byte> Test(ReadOnlySpan<byte> bytes, bool hasPadding)
+    {
+        int encodedLength = hasPadding
+            ? Base64Encoder.GetMaxEncodedLength(bytes.Length)
+            : Base64Encoder.GetEncodedLength(bytes.Length);
+
+        var encoded = new byte[encodedLength];
+
+        var pad = hasPadding ? (byte)'=' : (byte)0;
+        var status = _encoder.Encode(bytes, encoded, out var consumed, out var written, pad: pad, encodedLength: encodedLength);
+
+        Assert.That(status, Is.EqualTo(OperationStatus.Done));
+        Assert.That(consumed, Is.EqualTo(bytes.Length));
+        Assert.That(written, Is.EqualTo(encodedLength));
+
+        return encoded;
     }
 }

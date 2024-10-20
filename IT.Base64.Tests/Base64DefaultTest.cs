@@ -1,4 +1,6 @@
-﻿namespace IT.Base64.Tests;
+﻿using System.Buffers;
+
+namespace IT.Base64.Tests;
 
 public class Base64DefaultTest : Base64Test
 {
@@ -23,5 +25,27 @@ public class Base64DefaultTest : Base64Test
         Assert.That(invalid, Is.EqualTo('-'));
 
         Assert.That(_decoder.TryValid8("-/"), Is.EqualTo(DecodingStatus.InvalidData));
+    }
+
+    protected override ReadOnlySpan<byte> Test(ReadOnlySpan<byte> bytes, bool hasPadding)
+    {
+        var encoded = base.Test(bytes, hasPadding);
+
+        if (hasPadding)
+        {
+            Assert.That(encoded.Length, Is.EqualTo(System.Buffers.Text.Base64.GetMaxEncodedToUtf8Length(bytes.Length)));
+
+            Span<byte> utf8 = stackalloc byte[encoded.Length];
+
+            var status = System.Buffers.Text.Base64.EncodeToUtf8(bytes, utf8, out var consumed, out var written);
+
+            Assert.That(status, Is.EqualTo(OperationStatus.Done));
+            Assert.That(consumed, Is.EqualTo(bytes.Length));
+            Assert.That(written, Is.EqualTo(encoded.Length));
+
+            Assert.That(encoded.SequenceEqual(utf8), Is.True);
+        }
+
+        return encoded;
     }
 }
