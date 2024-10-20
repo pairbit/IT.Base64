@@ -787,6 +787,8 @@ public class Base64Decoder
 
     public Base64Decoder(ReadOnlySpan<sbyte> map)
     {
+        if (map.Length != 256) throw new ArgumentOutOfRangeException(nameof(map), map.Length, "length != 256");
+
         _map = map.ToArray();
     }
 
