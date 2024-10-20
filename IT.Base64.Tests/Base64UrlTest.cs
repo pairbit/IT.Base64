@@ -136,6 +136,7 @@ public class Base64UrlTest : Base64Test
 
         Assert.That(status, Is.EqualTo(OperationStatus.Done));
         Assert.That(consumed, Is.EqualTo(bytes.Length));
+        Assert.That(written, Is.EqualTo(encodedLength));
 
         if (hasPadding)
         {
@@ -145,7 +146,6 @@ public class Base64UrlTest : Base64Test
 
             Assert.That(len, Is.EqualTo(encodedLength));
             Assert.That(encoded[..len].SequenceEqual(utf8), Is.True);
-            Assert.That(written, Is.EqualTo(len));
 
             var pads = encoded[len..];
             for (int i = 0; i < pads.Length; i++)
@@ -156,7 +156,6 @@ public class Base64UrlTest : Base64Test
         else
         {
             Assert.That(encoded.Length, Is.EqualTo(encodedLength));
-            Assert.That(written, Is.EqualTo(encodedLength));
             Assert.That(encoded.SequenceEqual(utf8), Is.True);
         }
 
