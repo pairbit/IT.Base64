@@ -998,10 +998,10 @@ public static class UnsafeBase64
     public static void Encode24(ref char map, ref byte src, ref char encoded)
     {
         int i = src << 16 | Unsafe.AddByteOffset(ref src, 1) << 8 | Unsafe.AddByteOffset(ref src, 2);
-        encoded = Unsafe.Add(ref map, i >> 18);
-        Unsafe.AddByteOffset(ref encoded, 2) = Unsafe.Add(ref map, i >> 12 & 0x3F);
-        Unsafe.AddByteOffset(ref encoded, 4) = Unsafe.Add(ref map, i >> 6 & 0x3F);
-        Unsafe.AddByteOffset(ref encoded, 6) = Unsafe.Add(ref map, i & 0x3F);
+        encoded = Unsafe.AddByteOffset(ref map, i >> 18 << 1);
+        Unsafe.AddByteOffset(ref encoded, 2) = Unsafe.AddByteOffset(ref map, (i >> 12 & 0x3F) << 1);
+        Unsafe.AddByteOffset(ref encoded, 4) = Unsafe.AddByteOffset(ref map, (i >> 6 & 0x3F) << 1);
+        Unsafe.AddByteOffset(ref encoded, 6) = Unsafe.AddByteOffset(ref map, (i & 0x3F) << 1);
     }
 
     #endregion Encode24
@@ -1177,9 +1177,9 @@ public static class UnsafeBase64
     public static void Encode16(ref char map, ref byte src, ref char encoded)
     {
         int i = src << 16 | Unsafe.AddByteOffset(ref src, 1) << 8;
-        encoded = Unsafe.Add(ref map, i >> 18);
-        Unsafe.AddByteOffset(ref encoded, 2) = Unsafe.Add(ref map, i >> 12 & 0x3F);
-        Unsafe.AddByteOffset(ref encoded, 4) = Unsafe.Add(ref map, i >> 6 & 0x3F);
+        encoded = Unsafe.AddByteOffset(ref map, i >> 18 << 1);
+        Unsafe.AddByteOffset(ref encoded, 2) = Unsafe.AddByteOffset(ref map, (i >> 12 & 0x3F) << 1);
+        Unsafe.AddByteOffset(ref encoded, 4) = Unsafe.AddByteOffset(ref map, (i >> 6 & 0x3F) << 1);
     }
 
     #endregion Encode16
@@ -1348,8 +1348,8 @@ public static class UnsafeBase64
     public static void Encode8(ref char map, ref byte src, ref char encoded)
     {
         int i = src << 8;
-        encoded = Unsafe.Add(ref map, i >> 10);
-        Unsafe.AddByteOffset(ref encoded, 2) = Unsafe.Add(ref map, i >> 4 & 0x3F);
+        encoded = Unsafe.AddByteOffset(ref map, i >> 10 << 1);
+        Unsafe.AddByteOffset(ref encoded, 2) = Unsafe.AddByteOffset(ref map, (i >> 4 & 0x3F) << 1);
 
         //encoded = map[(src & 0xfc) >> 2];
         //Unsafe.AddByteOffset(ref encoded, 2) = map[(src & 0x03) << 4];
