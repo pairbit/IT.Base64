@@ -31,19 +31,27 @@ public class Base64DefaultTest : Base64Test
     {
         var encoded = base.Test(bytes, hasPadding);
 
+        var encodedLength = System.Buffers.Text.Base64.GetMaxEncodedToUtf8Length(bytes.Length);
+
+        Span<byte> utf8 = stackalloc byte[encodedLength];
+
+        var status = System.Buffers.Text.Base64.EncodeToUtf8(bytes, utf8, out var consumed, out var written);
+
+        Assert.That(status, Is.EqualTo(OperationStatus.Done));
+        Assert.That(consumed, Is.EqualTo(bytes.Length));
+        Assert.That(written, Is.EqualTo(encodedLength));
+
         if (hasPadding)
         {
-            Assert.That(encoded.Length, Is.EqualTo(System.Buffers.Text.Base64.GetMaxEncodedToUtf8Length(bytes.Length)));
-
-            Span<byte> utf8 = stackalloc byte[encoded.Length];
-
-            var status = System.Buffers.Text.Base64.EncodeToUtf8(bytes, utf8, out var consumed, out var written);
-
-            Assert.That(status, Is.EqualTo(OperationStatus.Done));
-            Assert.That(consumed, Is.EqualTo(bytes.Length));
-            Assert.That(written, Is.EqualTo(encoded.Length));
-
+            Assert.That(encoded.Length, Is.EqualTo(encodedLength));
             Assert.That(encoded.SequenceEqual(utf8), Is.True);
+        }
+        else
+        {
+            var paddingLength = Base64Encoder.GetPaddingLength(bytes.Length);
+
+            Assert.That(encoded.Length + paddingLength, Is.EqualTo(encodedLength));
+            Assert.That(encoded.SequenceEqual(utf8[..encoded.Length]), Is.True);
         }
 
         return encoded;
