@@ -252,20 +252,21 @@ public static class VectorBase64Url
     {
         if (BitConverter.IsLittleEndian && Vector128.IsHardwareAccelerated && (Ssse3.IsSupported || AdvSimd.Arm64.IsSupported))
         {
-            Vector128<sbyte> vector;
+            Vector128<sbyte> vector = Vector128.LoadUnsafe(ref encoded).AsSByte();
+            Vector128<sbyte> maskSlashOrUnderscore = Vector128.Create((sbyte)0x5F);//_
+            Vector128<sbyte> hiNibbles = Vector128.ShiftRightLogical(vector.AsInt32(), 4).AsSByte() & maskSlashOrUnderscore;
+            Vector128<sbyte> eq5F = Vector128.Equals(vector, maskSlashOrUnderscore);
             if (Ssse3.IsSupported)
             {
-                vector = Vector128.LoadUnsafe(ref encoded).AsSByte();
-                Vector128<sbyte> maskSlashOrUnderscore = Vector128.Create((sbyte)0x5F);//_
-                Vector128<sbyte> hiNibbles = Vector128.ShiftRightLogical(vector.AsInt32(), 4).AsSByte() & maskSlashOrUnderscore;
-                Vector128<sbyte> eq5F = Vector128.Equals(vector, maskSlashOrUnderscore);
                 if (!IsSsse3Valid128(vector, hiNibbles, eq5F))
                     return false;
                 vector = Ssse3Decode128(vector, hiNibbles, eq5F);
             }
             else
             {
-                throw new NotImplementedException("Arm64");
+                if (!IsArm64Valid128(vector, hiNibbles, eq5F))
+                    return false;
+                vector = Arm64Decode128(vector, hiNibbles, eq5F);
             }
             vector.AsByte().StoreUnsafe(ref src);
             return UnsafeBase64.TryDecode32(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref Unsafe.AddByteOffset(ref encoded, 16), ref Unsafe.AddByteOffset(ref src, 12));
@@ -280,11 +281,11 @@ public static class VectorBase64Url
     {
         if (BitConverter.IsLittleEndian && Vector128.IsHardwareAccelerated && (Ssse3.IsSupported || AdvSimd.Arm64.IsSupported))
         {
+            Vector128<sbyte> maskSlashOrUnderscore = Vector128.Create((sbyte)0x5F);//_
             Vector128<sbyte> vector;
             if (Ssse3.IsSupported)
             {
                 vector = xSse2.LoadUnsafe(ref encoded).AsSByte();
-                Vector128<sbyte> maskSlashOrUnderscore = Vector128.Create((sbyte)0x5F);//_
                 Vector128<sbyte> hiNibbles = Vector128.ShiftRightLogical(vector.AsInt32(), 4).AsSByte() & maskSlashOrUnderscore;
                 Vector128<sbyte> eq5F = Vector128.Equals(vector, maskSlashOrUnderscore);
                 if (!IsSsse3Valid128(vector, hiNibbles, eq5F))
@@ -293,7 +294,12 @@ public static class VectorBase64Url
             }
             else
             {
-                throw new NotImplementedException("Arm64");
+                vector = xArm64.LoadUnsafe(ref encoded).AsSByte();
+                Vector128<sbyte> hiNibbles = Vector128.ShiftRightLogical(vector.AsInt32(), 4).AsSByte() & maskSlashOrUnderscore;
+                Vector128<sbyte> eq5F = Vector128.Equals(vector, maskSlashOrUnderscore);
+                if (!IsArm64Valid128(vector, hiNibbles, eq5F))
+                    return false;
+                vector = Arm64Decode128(vector, hiNibbles, eq5F);
             }
             vector.AsByte().StoreUnsafe(ref src);
             return UnsafeBase64.TryDecode32(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref Unsafe.AddByteOffset(ref encoded, 32), ref Unsafe.AddByteOffset(ref src, 12));
@@ -308,13 +314,12 @@ public static class VectorBase64Url
     {
         if (BitConverter.IsLittleEndian && Vector128.IsHardwareAccelerated && (Ssse3.IsSupported || AdvSimd.Arm64.IsSupported))
         {
-            Vector128<sbyte> vector;
+            Vector128<sbyte> vector = Vector128.LoadUnsafe(ref encoded).AsSByte();
+            Vector128<sbyte> maskSlashOrUnderscore = Vector128.Create((sbyte)0x5F);//_
+            Vector128<sbyte> hiNibbles = Vector128.ShiftRightLogical(vector.AsInt32(), 4).AsSByte() & maskSlashOrUnderscore;
+            Vector128<sbyte> eq5F = Vector128.Equals(vector, maskSlashOrUnderscore);
             if (Ssse3.IsSupported)
             {
-                vector = Vector128.LoadUnsafe(ref encoded).AsSByte();
-                Vector128<sbyte> maskSlashOrUnderscore = Vector128.Create((sbyte)0x5F);//_
-                Vector128<sbyte> hiNibbles = Vector128.ShiftRightLogical(vector.AsInt32(), 4).AsSByte() & maskSlashOrUnderscore;
-                Vector128<sbyte> eq5F = Vector128.Equals(vector, maskSlashOrUnderscore);
                 if (!IsSsse3Valid128(vector, hiNibbles, eq5F))
                 {
                     invalid = UnsafeBase64.GetInvalid(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref encoded, 16);
@@ -324,7 +329,12 @@ public static class VectorBase64Url
             }
             else
             {
-                throw new NotImplementedException("Arm64");
+                if (!IsArm64Valid128(vector, hiNibbles, eq5F))
+                {
+                    invalid = UnsafeBase64.GetInvalid(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref encoded, 16);
+                    return false;
+                }
+                vector = Arm64Decode128(vector, hiNibbles, eq5F);
             }
             vector.AsByte().StoreUnsafe(ref src);
             return UnsafeBase64.TryDecode32(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref Unsafe.AddByteOffset(ref encoded, 16), ref Unsafe.AddByteOffset(ref src, 12), out invalid);
@@ -340,10 +350,10 @@ public static class VectorBase64Url
         if (BitConverter.IsLittleEndian && Vector128.IsHardwareAccelerated && (Ssse3.IsSupported || AdvSimd.Arm64.IsSupported))
         {
             Vector128<sbyte> vector;
+            Vector128<sbyte> maskSlashOrUnderscore = Vector128.Create((sbyte)0x5F);//_
             if (Ssse3.IsSupported)
             {
                 vector = xSse2.LoadUnsafe(ref encoded).AsSByte();
-                Vector128<sbyte> maskSlashOrUnderscore = Vector128.Create((sbyte)0x5F);//_
                 Vector128<sbyte> hiNibbles = Vector128.ShiftRightLogical(vector.AsInt32(), 4).AsSByte() & maskSlashOrUnderscore;
                 Vector128<sbyte> eq5F = Vector128.Equals(vector, maskSlashOrUnderscore);
                 if (!IsSsse3Valid128(vector, hiNibbles, eq5F))
@@ -355,7 +365,15 @@ public static class VectorBase64Url
             }
             else
             {
-                throw new NotImplementedException("Arm64");
+                vector = xArm64.LoadUnsafe(ref encoded).AsSByte();
+                Vector128<sbyte> hiNibbles = Vector128.ShiftRightLogical(vector.AsInt32(), 4).AsSByte() & maskSlashOrUnderscore;
+                Vector128<sbyte> eq5F = Vector128.Equals(vector, maskSlashOrUnderscore);
+                if (!IsArm64Valid128(vector, hiNibbles, eq5F))
+                {
+                    invalid = UnsafeBase64.GetInvalid(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref encoded, 32);
+                    return false;
+                }
+                vector = Arm64Decode128(vector, hiNibbles, eq5F);
             }
             vector.AsByte().StoreUnsafe(ref src);
             return UnsafeBase64.TryDecode32(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref Unsafe.AddByteOffset(ref encoded, 32), ref Unsafe.AddByteOffset(ref src, 12), out invalid);
@@ -377,7 +395,8 @@ public static class VectorBase64Url
             }
             else
             {
-                throw new NotImplementedException("Arm64");
+                if (!IsArm64Valid128(Vector128.LoadUnsafe(ref encoded).AsSByte()))
+                    return false;
             }
             return UnsafeBase64.IsValid32(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref Unsafe.AddByteOffset(ref encoded, 16));
         }
@@ -398,7 +417,8 @@ public static class VectorBase64Url
             }
             else
             {
-                throw new NotImplementedException("Arm64");
+                if (!IsArm64Valid128(xArm64.LoadUnsafe(ref encoded).AsSByte()))
+                    return false;
             }
             return UnsafeBase64.IsValid32(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref Unsafe.AddByteOffset(ref encoded, 32));
         }
@@ -422,7 +442,11 @@ public static class VectorBase64Url
             }
             else
             {
-                throw new NotImplementedException("Arm64");
+                if (!IsArm64Valid128(Vector128.LoadUnsafe(ref encoded).AsSByte()))
+                {
+                    invalid = UnsafeBase64.GetInvalid(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref encoded, 16);
+                    return false;
+                }
             }
             return UnsafeBase64.IsValid32(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref Unsafe.AddByteOffset(ref encoded, 16), out invalid);
         }
@@ -446,7 +470,11 @@ public static class VectorBase64Url
             }
             else
             {
-                throw new NotImplementedException("Arm64");
+                if (!IsArm64Valid128(xArm64.LoadUnsafe(ref encoded).AsSByte()))
+                {
+                    invalid = UnsafeBase64.GetInvalid(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref encoded, 32);
+                    return false;
+                }
             }
             return UnsafeBase64.IsValid32(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref Unsafe.AddByteOffset(ref encoded, 32), out invalid);
         }
@@ -470,6 +498,15 @@ public static class VectorBase64Url
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool IsArm64Valid128(Vector128<sbyte> vector)
+    {
+        Vector128<sbyte> maskSlashOrUnderscore = Vector128.Create((sbyte)0x5F);//_
+        Vector128<sbyte> hiNibbles = Vector128.ShiftRightLogical(vector.AsInt32(), 4).AsSByte() & maskSlashOrUnderscore;
+        Vector128<sbyte> eq5F = Vector128.Equals(vector, maskSlashOrUnderscore);
+        return IsArm64Valid128(vector, hiNibbles, eq5F);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsSsse3Valid128(Vector128<sbyte> vector, Vector128<sbyte> hiNibbles, Vector128<sbyte> eq5F)
     {
         // Take care as arguments are flipped in order!
@@ -490,6 +527,24 @@ public static class VectorBase64Url
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool IsArm64Valid128(Vector128<sbyte> vector, Vector128<sbyte> hiNibbles, Vector128<sbyte> eq5F)
+    {
+        return Vector128.AndNot(
+            Vector128.LessThan(vector, xArm64.Shuffle(Vector128.Create(
+                1, 1, 0x2d, 0x30,
+                0x41, 0x50, 0x61, 0x70,
+                1, 1, 1, 1,
+                1, 1, 1, 1
+            ).AsByte(), hiNibbles)) |
+            Vector128.GreaterThan(vector, xArm64.Shuffle(Vector128.Create(
+               0x00, 0x00, 0x2d, 0x39,
+               0x4f, 0x5a, 0x6f, 0x7a,
+               0x00, 0x00, 0x00, 0x00,
+               0x00, 0x00, 0x00, 0x00
+            ).AsByte(), hiNibbles)), eq5F) == default;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static Vector128<sbyte> Ssse3Decode128(Vector128<sbyte> vector, Vector128<sbyte> hiNibbles, Vector128<sbyte> eq5F)
         => Ssse3.Shuffle(
             Sse2.MultiplyAddAdjacent(
@@ -502,6 +557,26 @@ public static class VectorBase64Url
                     ), hiNibbles) + (eq5F & Vector128.Create((sbyte)33))).AsByte(),
                     Vector128.Create(0x01400140).AsSByte()),
                 Vector128.Create(0x00011000).AsInt16()).AsSByte(),
+            Vector128.Create(
+                2, 1, 0, 6,
+                5, 4, 10, 9,
+                8, 14, 13, 12,
+                -1, -1, -1, -1
+            ));
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static Vector128<sbyte> Arm64Decode128(Vector128<sbyte> vector, Vector128<sbyte> hiNibbles, Vector128<sbyte> eq5F)
+        => xArm64.Shuffle(
+            xArm64.MultiplyAddAdjacent(
+                xArm64.MultiplyAddAdjacent(
+                    (vector + xArm64.Shuffle(Vector128.Create(
+                        0, 0, 17, 4,
+                        -65, -65, -71, -71,
+                        0, 0, 0, 0,
+                        0, 0, 0, 0
+                    ).AsByte(), hiNibbles) + (eq5F & Vector128.Create((sbyte)33))).AsByte()
+                )
+            ).AsByte(),
             Vector128.Create(
                 2, 1, 0, 6,
                 5, 4, 10, 9,
