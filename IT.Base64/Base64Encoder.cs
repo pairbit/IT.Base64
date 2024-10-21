@@ -10,6 +10,7 @@ public class Base64Encoder
 {
     public static readonly Base64Encoder Default = new("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"u8);
     public static readonly Base64Encoder Url = new("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"u8);
+    public static readonly Base64Encoder IT = new("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-"u8);
 
     public const int MaxDataLength = int.MaxValue / 4 * 3; // 1610612733
 
@@ -31,6 +32,22 @@ public class Base64Encoder
         _bytes = array;
         _chars = System.Text.Encoding.UTF8.GetChars(array);
         Encoding = System.Text.Encoding.UTF8.GetString(bytes);
+    }
+
+    public static sbyte[] GetDecodingMap(ReadOnlySpan<byte> bytes)
+    {
+        if (bytes.Length != 64) throw new ArgumentOutOfRangeException(nameof(bytes), bytes.Length, "length != 64");
+
+        var map = new sbyte[256];
+        for (int i = 0; i < map.Length; i++)
+        {
+            map[i] = -1;
+        }
+        for (var i = 0; i < bytes.Length; i++)
+        {
+            map[bytes[i]] = (sbyte)i;
+        }
+        return map;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -84,6 +101,8 @@ public class Base64Encoder
 
     public static int GetEncodedLength(int dataLength)
         => GetMaxEncodedLength(dataLength) - GetPaddingLength(dataLength);
+
+    public sbyte[] GetDecodingMap() => GetDecodingMap(_bytes);
 
     public OperationStatus Encode(
         ReadOnlySpan<byte> data,
