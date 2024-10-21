@@ -1226,14 +1226,22 @@ public abstract class Base64Test
 
     protected virtual ReadOnlySpan<byte> Test(ReadOnlySpan<byte> bytes, bool hasPadding)
     {
-        int encodedLength = hasPadding
-            ? Base64Encoder.GetMaxEncodedLength(bytes.Length)
-            : Base64Encoder.GetEncodedLength(bytes.Length);
+        var maxEncodedLength = Base64Encoder.GetMaxEncodedLength(bytes.Length);
+        var paddingLength = Base64Encoder.GetPaddingLength(bytes.Length);
 
-        var encoded = new byte[encodedLength];
+        int encodedLength = maxEncodedLength - paddingLength;
 
-        var pad = hasPadding ? (byte)'=' : (byte)0;
-        var status = _encoder.Encode(bytes, encoded, out var consumed, out var written, pad: pad, encodedLength: encodedLength);
+        var encoded = new byte[hasPadding ? maxEncodedLength : encodedLength];
+
+        var status = _encoder.Encode(bytes, encoded, out var consumed, out var written);
+
+        if (hasPadding)
+        {
+            for (int i = 0; i < paddingLength; i++)
+            {
+                encoded[i + encodedLength] = (byte)'=';
+            }
+        }
 
         Assert.That(status, Is.EqualTo(OperationStatus.Done));
         Assert.That(consumed, Is.EqualTo(bytes.Length));

@@ -111,9 +111,7 @@ public class Base64Encoder
         Span<byte> encoded,
         out int consumed,
         out int written,
-        bool isFinalBlock = true,
-        byte pad = 0,
-        int encodedLength = -1)
+        bool isFinalBlock = true)
     {
         if (data.IsEmpty)
         {
@@ -124,20 +122,14 @@ public class Base64Encoder
 
         nuint srcLength = (uint)data.Length;
         nuint destLength = (uint)encoded.Length;
-        ref byte srcBytes = ref MemoryMarshal.GetReference(data);
+        ref byte src = ref MemoryMarshal.GetReference(data);
         ref byte dest = ref MemoryMarshal.GetReference(encoded);
-
-        if (encodedLength < 0)
-        {
-            encodedLength = GetMaxEncodedLength((int)srcLength);
-            if (pad == 0) encodedLength -= GetPaddingLength((int)srcLength);
-        }
-
-        nuint sourceIndex = 0;
+        
+        nuint srcIndex = 0;
         nuint destIndex = 0;
         nuint maxSrcLength;
 
-        if (srcLength <= MaxDataLength && destLength >= (uint)encodedLength)
+        if (srcLength <= MaxDataLength && destLength >= (uint)GetEncodedLength((int)srcLength))
         {
             maxSrcLength = srcLength;
         }
@@ -148,73 +140,60 @@ public class Base64Encoder
 
         maxSrcLength -= 2;
 
-        if ((nint)sourceIndex < (nint)maxSrcLength)
+        if ((nint)srcIndex < (nint)maxSrcLength)
         {
             do
             {
                 UnsafeBase64.Encode24(ref _bytes[0],
-                    ref Unsafe.AddByteOffset(ref srcBytes, sourceIndex),
+                    ref Unsafe.AddByteOffset(ref src, srcIndex),
                     ref Unsafe.AddByteOffset(ref dest, destIndex));
 
                 destIndex += 4;
-                sourceIndex += 3;
+                srcIndex += 3;
             }
-            while (sourceIndex < maxSrcLength);
+            while (srcIndex < maxSrcLength);
         }
 
         if (maxSrcLength != srcLength - 2) goto DestinationTooSmallExit;
 
         if (!isFinalBlock)
         {
-            if (sourceIndex == srcLength) goto DoneExit;
+            if (srcIndex == srcLength) goto DoneExit;
 
             goto NeedMoreDataExit;
         }
 
-        if (sourceIndex == srcLength - 1)
+        if (srcIndex == srcLength - 1)
         {
             UnsafeBase64.Encode8(ref _bytes[0],
-                ref Unsafe.AddByteOffset(ref srcBytes, sourceIndex),
+                ref Unsafe.AddByteOffset(ref src, srcIndex),
                 ref Unsafe.AddByteOffset(ref dest, destIndex));
 
             destIndex += 2;
-
-            if (pad > 0)
-            {
-                Unsafe.AddByteOffset(ref dest, destIndex++) = pad;
-                Unsafe.AddByteOffset(ref dest, destIndex++) = pad;
-            }
-
-            sourceIndex += 1;
+            srcIndex += 1;
         }
-        else if (sourceIndex == srcLength - 2)
+        else if (srcIndex == srcLength - 2)
         {
             UnsafeBase64.Encode16(ref _bytes[0],
-                ref Unsafe.AddByteOffset(ref srcBytes, sourceIndex),
+                ref Unsafe.AddByteOffset(ref src, srcIndex),
                 ref Unsafe.AddByteOffset(ref dest, destIndex));
 
             destIndex += 3;
-
-            if (pad > 0)
-            {
-                Unsafe.AddByteOffset(ref dest, destIndex++) = pad;
-            }
-
-            sourceIndex += 2;
+            srcIndex += 2;
         }
 
     DoneExit:
-        consumed = (int)sourceIndex;
+        consumed = (int)srcIndex;
         written = (int)destIndex;
         return OperationStatus.Done;
 
     NeedMoreDataExit:
-        consumed = (int)sourceIndex;
+        consumed = (int)srcIndex;
         written = (int)destIndex;
         return OperationStatus.NeedMoreData;
 
     DestinationTooSmallExit:
-        consumed = (int)sourceIndex;
+        consumed = (int)srcIndex;
         written = (int)destIndex;
         return OperationStatus.DestinationTooSmall;
     }
