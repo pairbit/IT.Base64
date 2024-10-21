@@ -211,6 +211,18 @@ public static class VectorBase64Url
 
     #region Unsafe
 
+    public static void Encode96(ref byte src, ref byte encoded)
+    {
+        if (BitConverter.IsLittleEndian && Vector128.IsHardwareAccelerated && (Ssse3.IsSupported || AdvSimd.Arm64.IsSupported))
+        {
+            (Ssse3.IsSupported ? Ssse3Encode128(ref src) : Arm64Encode128(ref src)).AsByte().StoreUnsafe(ref encoded);
+        }
+        else
+        {
+            UnsafeBase64.Encode96(ref MemoryMarshal.GetReference(Base64Encoder.Url.Bytes.Span), ref src, ref encoded);
+        }
+    }
+
     public static void Encode128(ref byte src, ref byte encoded)
     {
         if (BitConverter.IsLittleEndian && Vector128.IsHardwareAccelerated && (Ssse3.IsSupported || AdvSimd.Arm64.IsSupported))
