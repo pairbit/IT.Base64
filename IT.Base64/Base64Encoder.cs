@@ -104,6 +104,8 @@ public class Base64Encoder
 
     public sbyte[] GetDecodingMap() => GetDecodingMap(_bytes);
 
+    #region Encode
+
     public OperationStatus Encode(
         ReadOnlySpan<byte> data,
         Span<byte> encoded,
@@ -216,6 +218,19 @@ public class Base64Encoder
         written = (int)destIndex;
         return OperationStatus.DestinationTooSmall;
     }
+
+    public byte[] EncodeToBytes(ReadOnlySpan<byte> data)
+    {
+        int encodedLength = GetEncodedLength(data.Length);
+
+        var encoded = new byte[encodedLength];
+
+        Encode(data, encoded, out _, out _);
+
+        return encoded;
+    }
+
+    #endregion Encode
 
     #region Encode128
 

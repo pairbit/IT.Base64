@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.Arm;
@@ -19,6 +18,29 @@ public class BaseTest
         decodingMap = Base64Encoder.IT.GetDecodingMap();
 
         Assert.That(decodingMap.AsSpan().SequenceEqual(Base64Decoder.IT.Map.Span), Is.True);
+    }
+    
+    [Test]
+    public void EncodeDecodeOther()
+    {
+        var data = "My secret string"u8;
+        var encoded = new string('\0', 22);
+        UnsafeBase64.Encode128(
+            ref MemoryMarshal.GetReference(Base64Encoder.IT.Chars.Span),
+            ref MemoryMarshal.GetReference(data),
+            ref Unsafe.AsRef(in encoded.GetPinnableReference()));
+
+        var decoded = new byte[16];
+        UnsafeBase64.TryDecode128(
+            ref MemoryMarshal.GetReference(Base64Decoder.IT.Map.Span),
+            ref Unsafe.AsRef(in encoded.GetPinnableReference()),
+            ref decoded[0]);
+
+        Assert.That(data.SequenceEqual(decoded), Is.True);
+
+        var base64 = Convert.FromBase64String(encoded + "==");
+
+        Assert.That(data.SequenceEqual(base64), Is.False);
     }
 
     public static void ShowMap(sbyte[] map)
