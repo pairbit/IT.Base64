@@ -11,6 +11,7 @@ namespace IT.Base64.Benchmarks;
 [Orderer(SummaryOrderPolicy.FastestToSlowest, MethodOrderPolicy.Declared)]
 public class Benchmark128
 {
+    private Id _id;
     private Guid _guid;
     private string _encodedString = null!;
     private byte[] _encodedBytes = null!;
@@ -19,6 +20,7 @@ public class Benchmark128
     [GlobalSetup]
     public void GlobalSetup()
     {
+        _id = Id.New();
         _guid = Guid.NewGuid();
         _encodedString = EncodeToString_Simple();
         _encodedBytes = EncodeToBytes_Simple();
@@ -130,6 +132,28 @@ public class Benchmark128
         return encodedStruct;
     }
 
+    [Benchmark]
+    public byte[] Id_ToBase64Url()
+    {
+        var encoded = new byte[16];
+
+        _id.TryToBase64Url(encoded);
+
+        return encoded;
+    }
+
+    [Benchmark]
+    public byte[] Id_Encode96Url()
+    {
+        var encoded = new byte[16];
+
+        UnsafeBase64.Encode96(ref MemoryMarshal.GetReference(Base64Encoder.Url.Bytes.Span), 
+            ref Unsafe.As<Id, byte>(ref _id), 
+            ref encoded[0]);
+
+        return encoded;
+    }
+
     #endregion EncodeToBytes
 
     #region DecodeFromString
@@ -146,7 +170,7 @@ public class Benchmark128
         return Unsafe.As<byte, Guid>(ref MemoryMarshal.GetReference(buffer));
     }
 
-    [Benchmark]
+    //[Benchmark]
     public Guid DecodeFromString_IT_Vector()
     {
         Guid guid = default;
@@ -154,7 +178,7 @@ public class Benchmark128
         return guid;
     }
 
-    [Benchmark]
+    //[Benchmark]
     public Guid DecodeFromString_IT()
     {
         Guid guid = default;
@@ -212,6 +236,8 @@ public class Benchmark128
             if (!bytes.SequenceEqual(EncodeToBytes_gfoidl())) throw new InvalidOperationException(nameof(EncodeToBytes_gfoidl));
             if (!bytes.SequenceEqual(EncodeToBytes_IT())) throw new InvalidOperationException(nameof(EncodeToBytes_IT));
             if (!bytes.SequenceEqual(EncodeToBytes_IT_Vector())) throw new InvalidOperationException(nameof(EncodeToBytes_IT_Vector));
+
+            if (!Id_ToBase64Url().SequenceEqual(Id_Encode96Url())) throw new InvalidOperationException(nameof(Id_ToBase64Url));
 
             if (!System.Text.Encoding.UTF8.GetString(bytes).Equals(str)) throw new InvalidOperationException();
 

@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.14.0" />
     <PackageReference Include="gfoidl.Base64" Version="2.0.0" />
+    <PackageReference Include="IT.Id" Version="2.0.3" />
   </ItemGroup>
 
   <ItemGroup>
