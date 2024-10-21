@@ -132,7 +132,7 @@ public class Benchmark128
         return encodedStruct;
     }
 
-    [Benchmark]
+    //[Benchmark]
     public byte[] Id_ToBase64Url()
     {
         var encoded = new byte[16];
@@ -142,7 +142,7 @@ public class Benchmark128
         return encoded;
     }
 
-    [Benchmark]
+    //[Benchmark]
     public byte[] Id_UnsafeEncode()
     {
         var encoded = new byte[16];
@@ -155,11 +155,24 @@ public class Benchmark128
     }
 
     [Benchmark]
-    public byte[] Id_VectorEncode()
+    public byte[] Id_UnsafeVectorEncode()
     {
         var encoded = new byte[16];
 
         VectorBase64Url.Encode96(ref Unsafe.As<Id, byte>(ref _id), ref encoded[0]);
+
+        return encoded;
+    }
+
+    [Benchmark]
+    public byte[] Id_VectorEncode()
+    {
+        Span<byte> buffer = stackalloc byte[16];
+        Unsafe.As<byte, Id>(ref MemoryMarshal.GetReference(buffer)) = _id;
+
+        var encoded = new byte[16];
+
+        VectorBase64Url.Encode96(ref MemoryMarshal.GetReference(buffer), ref encoded[0]);
 
         return encoded;
     }
@@ -251,6 +264,7 @@ public class Benchmark128
             bytes = Id_ToBase64Url();
             if (!bytes!.SequenceEqual(Id_UnsafeEncode())) throw new InvalidOperationException(nameof(Id_UnsafeEncode));
             if (!bytes!.SequenceEqual(Id_VectorEncode())) throw new InvalidOperationException(nameof(Id_VectorEncode));
+            if (!bytes!.SequenceEqual(Id_UnsafeVectorEncode())) throw new InvalidOperationException(nameof(Id_VectorEncode));
 
             var guid = _guid;
             if (!guid.Equals(DecodeFromString_Convert())) throw new InvalidOperationException(nameof(DecodeFromString_Convert));
