@@ -19,14 +19,15 @@ public class BaseTest
     [Test]
     public void IntrinsicsTest()
     {
-        Console.WriteLine(RuntimeInformation.OSArchitecture);
+        Console.WriteLine($"OSArchitecture: {RuntimeInformation.OSArchitecture}");
 
         Assert.That(BitConverter.IsLittleEndian, Is.True);
         Assert.That(Vector128.IsHardwareAccelerated, Is.True);
-        Assert.That(Avx2.IsSupported, Is.True);
-        Assert.That(Ssse3.IsSupported, Is.True);
-        Assert.That(AdvSimd.Arm64.IsSupported, Is.False);
-        
+        Assert.That(Ssse3.IsSupported || AdvSimd.Arm64.IsSupported, Is.True);
+
+        if (Ssse3.IsSupported) Console.WriteLine("Ssse3");
+        if (AdvSimd.Arm64.IsSupported) Console.WriteLine("Arm64");
+
         Assert.That(Vector128<short>.Count, Is.EqualTo(8));
         Assert.That(Vector128<byte>.Count, Is.EqualTo(16));
         Assert.That(Vector256<byte>.Count, Is.EqualTo(32));
