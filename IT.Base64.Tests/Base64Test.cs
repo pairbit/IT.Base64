@@ -1228,8 +1228,7 @@ public abstract class Base64Test
     {
         var maxEncodedLength = Base64Encoder.GetMaxEncodedLength(bytes.Length);
         var paddingLength = Base64Encoder.GetPaddingLength(bytes.Length);
-
-        int encodedLength = maxEncodedLength - paddingLength;
+        var encodedLength = maxEncodedLength - paddingLength;
 
         var encoded = new byte[hasPadding ? maxEncodedLength : encodedLength];
 
