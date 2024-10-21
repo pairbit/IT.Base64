@@ -1,0 +1,47 @@
+name: .NET
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            3.1.x
+            6.0.x
+            7.0.x
+            8.0.x
+    
+      - name: Restore
+        run: dotnet restore IT.Base64.sln
+    
+      - name: Build
+        run: dotnet build IT.Base64.sln --configuration Release --no-restore 
+    
+      - name: Test
+        run: dotnet test IT.Base64.Tests/IT.Base64.Tests.csproj --configuration Release --no-restore
+
+  publish:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish IT.Base64
+        uses: pairbit/publish-nuget@v2.6.1
+        with:
+            PROJECT_FILE_PATH: IT.Base64/IT.Base64.csproj
+            NUGET_KEY: ${{secrets.NUGET}}
+            TAG_COMMIT: true
