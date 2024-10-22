@@ -14,8 +14,8 @@ public class Base64Encoder
 
     public const int MaxDataLength = int.MaxValue / 4 * 3; // 1610612733
 
-    private readonly char[] _chars;
-    private readonly byte[] _bytes;
+    internal readonly char[] _chars;
+    internal readonly byte[] _bytes;
 
     public string Encoding { get; }
 

@@ -1039,7 +1039,7 @@ public class Base64Decoder
     -1, //255
     ]);
 
-    private readonly sbyte[] _map;
+    internal readonly sbyte[] _map;
 
     public ReadOnlyMemory<sbyte> Map => _map;
 
