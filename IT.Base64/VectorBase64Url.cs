@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.Arm;
 using System.Runtime.Intrinsics.X86;
@@ -14,206 +13,7 @@ public static class VectorBase64Url
     private static readonly byte[] _bytes = Base64Encoder.Url._bytes;
     private static readonly sbyte[] _map = Base64Decoder.Url._map;
 
-    #region Encode128
-
-    public static EncodingStatus TryEncode128(Int128 value, Span<byte> encoded)
-    {
-        if (encoded.Length < 22) return EncodingStatus.InvalidDestinationLength;
-
-        Encode128(ref Unsafe.As<Int128, byte>(ref value), ref MemoryMarshal.GetReference(encoded));
-
-        return EncodingStatus.Done;
-    }
-
-    public static EncodingStatus TryEncode128(Int128 value, Span<char> encoded)
-    {
-        if (encoded.Length < 22) return EncodingStatus.InvalidDestinationLength;
-
-        Encode128(ref Unsafe.As<Int128, byte>(ref value), ref MemoryMarshal.GetReference(encoded));
-
-        return EncodingStatus.Done;
-    }
-
-    /// <exception cref="ArgumentOutOfRangeException"/>
-    public static void Encode128(Int128 value, Span<byte> encoded)
-    {
-        if (encoded.Length < 22) throw new ArgumentOutOfRangeException(nameof(encoded), encoded.Length, "length < 22");
-
-        Encode128(ref Unsafe.As<Int128, byte>(ref value), ref MemoryMarshal.GetReference(encoded));
-    }
-
-    /// <exception cref="ArgumentOutOfRangeException"/>
-    public static void Encode128(Int128 value, Span<char> encoded)
-    {
-        if (encoded.Length < 22) throw new ArgumentOutOfRangeException(nameof(encoded), encoded.Length, "length < 22");
-
-        Encode128(ref Unsafe.As<Int128, byte>(ref value), ref MemoryMarshal.GetReference(encoded));
-    }
-
-    public static byte[] Encode128ToBytes(Int128 value)
-    {
-        var encoded = new byte[22];
-
-        Encode128(ref Unsafe.As<Int128, byte>(ref value), ref encoded[0]);
-
-        return encoded;
-    }
-
-    public static char[] Encode128ToChars(Int128 value)
-    {
-        var encoded = new char[22];
-
-        Encode128(ref Unsafe.As<Int128, byte>(ref value), ref encoded[0]);
-
-        return encoded;
-    }
-
-    public static string Encode128ToString(Int128 value) => string.Create(22, value, static (chars, value) =>
-    {
-        Encode128(ref Unsafe.As<Int128, byte>(ref value), ref MemoryMarshal.GetReference(chars));
-    });
-
-    #endregion Encode128
-
-    #region Decode128
-
-    public static DecodingStatus TryDecode128(ReadOnlySpan<byte> encoded, out Int128 value)
-    {
-        value = default;
-        if (encoded.Length != 22) return DecodingStatus.InvalidDataLength;
-
-        if (!TryDecode128(ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<Int128, byte>(ref value)))
-        {
-            value = default;
-            return DecodingStatus.InvalidData;
-        }
-        return DecodingStatus.Done;
-    }
-
-    public static DecodingStatus TryDecode128(ReadOnlySpan<char> encoded, out Int128 value)
-    {
-        value = default;
-        if (encoded.Length != 22) return DecodingStatus.InvalidDataLength;
-
-        if (!TryDecode128(ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<Int128, byte>(ref value)))
-        {
-            value = default;
-            return DecodingStatus.InvalidData;
-        }
-        return DecodingStatus.Done;
-    }
-
-    public static DecodingStatus TryDecode128(ReadOnlySpan<byte> encoded, out Int128 value, out byte invalid)
-    {
-        value = default;
-        if (encoded.Length != 22)
-        {
-            invalid = default;
-            return DecodingStatus.InvalidDataLength;
-        }
-        if (!TryDecode128(ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<Int128, byte>(ref value), out invalid))
-        {
-            value = default;
-            return DecodingStatus.InvalidData;
-        }
-        return DecodingStatus.Done;
-    }
-
-    public static DecodingStatus TryDecode128(ReadOnlySpan<char> encoded, out Int128 value, out char invalid)
-    {
-        value = default;
-        if (encoded.Length != 22)
-        {
-            invalid = default;
-            return DecodingStatus.InvalidDataLength;
-        }
-        if (!TryDecode128(ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<Int128, byte>(ref value), out invalid))
-        {
-            value = default;
-            return DecodingStatus.InvalidData;
-        }
-        return DecodingStatus.Done;
-    }
-
-    /// <exception cref="ArgumentOutOfRangeException"/>
-    public static Int128 Decode128(ReadOnlySpan<byte> encoded)
-    {
-        if (encoded.Length != 22) throw new ArgumentOutOfRangeException(nameof(encoded), encoded.Length, "length != 22");
-
-        Int128 value = 0;
-        if (!TryDecode128(ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<Int128, byte>(ref value), out var invalid))
-            throw new ArgumentOutOfRangeException(nameof(encoded), invalid, "invalid byte");
-
-        return value;
-    }
-
-    /// <exception cref="ArgumentOutOfRangeException"/>
-    public static Int128 Decode128(ReadOnlySpan<char> encoded)
-    {
-        if (encoded.Length != 22) throw new ArgumentOutOfRangeException(nameof(encoded), encoded.Length, "length != 22");
-
-        Int128 value = 0;
-        if (!TryDecode128(ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<Int128, byte>(ref value), out var invalid))
-            throw new ArgumentOutOfRangeException(nameof(encoded), invalid, "invalid char");
-
-        return value;
-    }
-
-    #endregion Decode128
-
-    #region Valid128
-
-    public static DecodingStatus TryValid128(ReadOnlySpan<byte> encoded)
-    {
-        if (encoded.Length != 22) return DecodingStatus.InvalidDataLength;
-        return IsValid128(ref MemoryMarshal.GetReference(encoded)) ? DecodingStatus.Done : DecodingStatus.InvalidData;
-    }
-
-    public static DecodingStatus TryValid128(ReadOnlySpan<char> encoded)
-    {
-        if (encoded.Length != 22) return DecodingStatus.InvalidDataLength;
-        return IsValid128(ref MemoryMarshal.GetReference(encoded)) ? DecodingStatus.Done : DecodingStatus.InvalidData;
-    }
-
-    public static DecodingStatus TryValid128(ReadOnlySpan<byte> encoded, out byte invalid)
-    {
-        if (encoded.Length != 22)
-        {
-            invalid = default;
-            return DecodingStatus.InvalidDataLength;
-        }
-        return IsValid128(ref MemoryMarshal.GetReference(encoded), out invalid) ? DecodingStatus.Done : DecodingStatus.InvalidData;
-    }
-
-    public static DecodingStatus TryValid128(ReadOnlySpan<char> encoded, out char invalid)
-    {
-        if (encoded.Length != 22)
-        {
-            invalid = default;
-            return DecodingStatus.InvalidDataLength;
-        }
-        return IsValid128(ref MemoryMarshal.GetReference(encoded), out invalid) ? DecodingStatus.Done : DecodingStatus.InvalidData;
-    }
-
-    /// <exception cref="ArgumentOutOfRangeException"/>
-    public static void Valid128(ReadOnlySpan<byte> encoded)
-    {
-        if (encoded.Length != 22) throw new ArgumentOutOfRangeException(nameof(encoded), encoded.Length, "length != 22");
-        if (!IsValid128(ref MemoryMarshal.GetReference(encoded), out var invalid))
-            throw new ArgumentOutOfRangeException(nameof(encoded), invalid, "invalid byte");
-    }
-
-    /// <exception cref="ArgumentOutOfRangeException"/>
-    public static void Valid128(ReadOnlySpan<char> encoded)
-    {
-        if (encoded.Length != 22) throw new ArgumentOutOfRangeException(nameof(encoded), encoded.Length, "length != 22");
-        if (!IsValid128(ref MemoryMarshal.GetReference(encoded), out var invalid))
-            throw new ArgumentOutOfRangeException(nameof(encoded), invalid, "invalid char");
-    }
-
-    #endregion Valid128
-
-    #region Unsafe
+    #region Public
 
     public static void Encode96(ref byte src, ref byte encoded)
     {
@@ -860,7 +660,7 @@ public static class VectorBase64Url
         }
     }
 
-    #endregion Unsafe
+    #endregion Public
 
     #region Private
 
