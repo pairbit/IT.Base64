@@ -531,6 +531,7 @@ public class Base64Encoder
             UnsafeBase64.Encode128(ref _chars[0], ref MemoryMarshal.GetReference(data), ref MemoryMarshal.GetReference(encoded));
     }
 
+    /// <exception cref="ArgumentOutOfRangeException"/>
     public byte[] Encode128ToBytes(ReadOnlySpan<byte> data)
     {
         if (data.Length < 16) throw new ArgumentOutOfRangeException(nameof(data), data.Length, "length < 16");
@@ -544,6 +545,7 @@ public class Base64Encoder
         return encoded;
     }
 
+    /// <exception cref="ArgumentOutOfRangeException"/>
     public char[] Encode128ToChars(ReadOnlySpan<byte> data)
     {
         if (data.Length < 16) throw new ArgumentOutOfRangeException(nameof(data), data.Length, "length < 16");
@@ -557,6 +559,7 @@ public class Base64Encoder
         return encoded;
     }
 
+    /// <exception cref="ArgumentOutOfRangeException"/>
     public string Encode128ToString(ReadOnlySpan<byte> data)
     {
         if (data.Length < 16) throw new ArgumentOutOfRangeException(nameof(data), data.Length, "length < 16");
