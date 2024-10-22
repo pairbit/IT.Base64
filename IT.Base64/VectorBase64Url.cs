@@ -815,44 +815,6 @@ public static class VectorBase64Url
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSsse3Valid128(Vector128<sbyte> vector, Vector128<sbyte> hiNibbles, Vector128<sbyte> eq5F)
-    {
-        // Take care as arguments are flipped in order!
-        //Vector128<sbyte> outside = Sse2.AndNot(eq5F, below | above);
-        return Vector128.AndNot(
-            Vector128.LessThan(vector, Ssse3.Shuffle(Vector128.Create(
-                1, 1, 0x2d, 0x30,
-                0x41, 0x50, 0x61, 0x70,
-                1, 1, 1, 1,
-                1, 1, 1, 1
-            ), hiNibbles)) |
-            Vector128.GreaterThan(vector, Ssse3.Shuffle(Vector128.Create(
-               0x00, 0x00, 0x2d, 0x39,
-               0x4f, 0x5a, 0x6f, 0x7a,
-               0x00, 0x00, 0x00, 0x00,
-               0x00, 0x00, 0x00, 0x00
-            ), hiNibbles)), eq5F) == default;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsArm64Valid128(Vector128<sbyte> vector, Vector128<sbyte> hiNibbles, Vector128<sbyte> eq5F)
-    {
-        return Vector128.AndNot(
-            Vector128.LessThan(vector, xArm64.Shuffle(Vector128.Create(
-                1, 1, 0x2d, 0x30,
-                0x41, 0x50, 0x61, 0x70,
-                1, 1, 1, 1,
-                1, 1, 1, 1
-            ).AsByte(), hiNibbles)) |
-            Vector128.GreaterThan(vector, xArm64.Shuffle(Vector128.Create(
-               0x00, 0x00, 0x2d, 0x39,
-               0x4f, 0x5a, 0x6f, 0x7a,
-               0x00, 0x00, 0x00, 0x00,
-               0x00, 0x00, 0x00, 0x00
-            ).AsByte(), hiNibbles)), eq5F) == default;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool VectorDecode96(ref byte encoded, ref byte src)
     {
         Vector128<sbyte> vector = Vector128.LoadUnsafe(ref encoded).AsSByte();
@@ -900,6 +862,44 @@ public static class VectorBase64Url
         }
         vector.AsByte().StoreUnsafe(ref src);
         return true;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool IsSsse3Valid128(Vector128<sbyte> vector, Vector128<sbyte> hiNibbles, Vector128<sbyte> eq5F)
+    {
+        // Take care as arguments are flipped in order!
+        //Vector128<sbyte> outside = Sse2.AndNot(eq5F, below | above);
+        return Vector128.AndNot(
+            Vector128.LessThan(vector, Ssse3.Shuffle(Vector128.Create(
+                1, 1, 0x2d, 0x30,
+                0x41, 0x50, 0x61, 0x70,
+                1, 1, 1, 1,
+                1, 1, 1, 1
+            ), hiNibbles)) |
+            Vector128.GreaterThan(vector, Ssse3.Shuffle(Vector128.Create(
+               0x00, 0x00, 0x2d, 0x39,
+               0x4f, 0x5a, 0x6f, 0x7a,
+               0x00, 0x00, 0x00, 0x00,
+               0x00, 0x00, 0x00, 0x00
+            ), hiNibbles)), eq5F) == default;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool IsArm64Valid128(Vector128<sbyte> vector, Vector128<sbyte> hiNibbles, Vector128<sbyte> eq5F)
+    {
+        return Vector128.AndNot(
+            Vector128.LessThan(vector, xArm64.Shuffle(Vector128.Create(
+                1, 1, 0x2d, 0x30,
+                0x41, 0x50, 0x61, 0x70,
+                1, 1, 1, 1,
+                1, 1, 1, 1
+            ).AsByte(), hiNibbles)) |
+            Vector128.GreaterThan(vector, xArm64.Shuffle(Vector128.Create(
+               0x00, 0x00, 0x2d, 0x39,
+               0x4f, 0x5a, 0x6f, 0x7a,
+               0x00, 0x00, 0x00, 0x00,
+               0x00, 0x00, 0x00, 0x00
+            ).AsByte(), hiNibbles)), eq5F) == default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
