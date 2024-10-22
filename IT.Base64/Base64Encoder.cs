@@ -387,6 +387,98 @@ public class Base64Encoder
 
     #endregion Guid
 
+    #region unmanaged
+
+    public EncodingStatus TryEncode128<T>(T value, Span<byte> encoded) where T : unmanaged
+    {
+        if (Unsafe.SizeOf<T>() < 16) return EncodingStatus.InvalidDataLength;
+        if (encoded.Length < 22) return EncodingStatus.InvalidDestinationLength;
+
+        if (_isVectorUrl)
+            VectorBase64Url.Encode128(ref Unsafe.As<T, byte>(ref value), ref MemoryMarshal.GetReference(encoded));
+        else
+            UnsafeBase64.Encode128(ref _bytes[0], ref Unsafe.As<T, byte>(ref value), ref MemoryMarshal.GetReference(encoded));
+
+        return EncodingStatus.Done;
+    }
+
+    public EncodingStatus TryEncode128<T>(T value, Span<char> encoded) where T : unmanaged
+    {
+        if (Unsafe.SizeOf<T>() < 16) return EncodingStatus.InvalidDataLength;
+        if (encoded.Length < 22) return EncodingStatus.InvalidDestinationLength;
+
+        if (_isVectorUrl)
+            VectorBase64Url.Encode128(ref Unsafe.As<T, byte>(ref value), ref MemoryMarshal.GetReference(encoded));
+        else
+            UnsafeBase64.Encode128(ref _chars[0], ref Unsafe.As<T, byte>(ref value), ref MemoryMarshal.GetReference(encoded));
+
+        return EncodingStatus.Done;
+    }
+
+    /// <exception cref="ArgumentOutOfRangeException"/>
+    public void Encode128<T>(T value, Span<byte> encoded) where T : unmanaged
+    {
+        if (Unsafe.SizeOf<T>() < 16) throw new ArgumentOutOfRangeException(nameof(T), Unsafe.SizeOf<T>(), $"SizeOf<{typeof(T).FullName}> < 16");
+        if (encoded.Length < 22) throw new ArgumentOutOfRangeException(nameof(encoded), encoded.Length, "length < 22");
+
+        if (_isVectorUrl)
+            VectorBase64Url.Encode128(ref Unsafe.As<T, byte>(ref value), ref MemoryMarshal.GetReference(encoded));
+        else
+            UnsafeBase64.Encode128(ref _bytes[0], ref Unsafe.As<T, byte>(ref value), ref MemoryMarshal.GetReference(encoded));
+    }
+
+    /// <exception cref="ArgumentOutOfRangeException"/>
+    public void Encode128<T>(T value, Span<char> encoded) where T : unmanaged
+    {
+        if (Unsafe.SizeOf<T>() < 16) throw new ArgumentOutOfRangeException(nameof(T), Unsafe.SizeOf<T>(), $"SizeOf<{typeof(T).FullName}> < 16");
+        if (encoded.Length < 22) throw new ArgumentOutOfRangeException(nameof(encoded), encoded.Length, "length < 22");
+
+        if (_isVectorUrl)
+            VectorBase64Url.Encode128(ref Unsafe.As<T, byte>(ref value), ref MemoryMarshal.GetReference(encoded));
+        else
+            UnsafeBase64.Encode128(ref _chars[0], ref Unsafe.As<T, byte>(ref value), ref MemoryMarshal.GetReference(encoded));
+    }
+
+    public byte[] Encode128ToBytes<T>(T value) where T : unmanaged
+    {
+        if (Unsafe.SizeOf<T>() < 16) throw new ArgumentOutOfRangeException(nameof(T), Unsafe.SizeOf<T>(), $"SizeOf<{typeof(T).FullName}> < 16");
+        var encoded = new byte[22];
+
+        if (_isVectorUrl)
+            VectorBase64Url.Encode128(ref Unsafe.As<T, byte>(ref value), ref encoded[0]);
+        else
+            UnsafeBase64.Encode128(ref _bytes[0], ref Unsafe.As<T, byte>(ref value), ref encoded[0]);
+
+        return encoded;
+    }
+
+    public char[] Encode128ToChars<T>(T value) where T : unmanaged
+    {
+        if (Unsafe.SizeOf<T>() < 16) throw new ArgumentOutOfRangeException(nameof(T), Unsafe.SizeOf<T>(), $"SizeOf<{typeof(T).FullName}> < 16");
+        var encoded = new char[22];
+
+        if (_isVectorUrl)
+            VectorBase64Url.Encode128(ref Unsafe.As<T, byte>(ref value), ref encoded[0]);
+        else
+            UnsafeBase64.Encode128(ref _chars[0], ref Unsafe.As<T, byte>(ref value), ref encoded[0]);
+
+        return encoded;
+    }
+
+    public string Encode128ToString<T>(T value) where T : unmanaged
+    {
+        if (Unsafe.SizeOf<T>() < 16) throw new ArgumentOutOfRangeException(nameof(T), Unsafe.SizeOf<T>(), $"SizeOf<{typeof(T).FullName}> < 16");
+        return string.Create(22, value, (chars, value) =>
+        {
+            if (_isVectorUrl)
+                VectorBase64Url.Encode128(ref Unsafe.As<T, byte>(ref value), ref MemoryMarshal.GetReference(chars));
+            else
+                UnsafeBase64.Encode128(ref _chars[0], ref Unsafe.As<T, byte>(ref value), ref MemoryMarshal.GetReference(chars));
+        });
+    }
+
+    #endregion unmanaged
+
     #endregion Encode128
 
     #region Encode72
