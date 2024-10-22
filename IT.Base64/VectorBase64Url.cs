@@ -655,6 +655,84 @@ public static class VectorBase64Url
     #region Private
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool IsVectorValid96(ref byte encoded, out byte invalid)
+    {
+        if (Ssse3.IsSupported)
+        {
+            if (!IsSsse3Valid128(Vector128.LoadUnsafe(ref encoded).AsSByte()))
+            {
+                invalid = UnsafeBase64.GetInvalid(ref _map[0], ref encoded, 16);
+                return false;
+            }
+        }
+        else
+        {
+            if (!IsArm64Valid128(Vector128.LoadUnsafe(ref encoded).AsSByte()))
+            {
+                invalid = UnsafeBase64.GetInvalid(ref _map[0], ref encoded, 16);
+                return false;
+            }
+        }
+        invalid = default;
+        return true;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool IsVectorValid96(ref char encoded, out char invalid)
+    {
+        if (Ssse3.IsSupported)
+        {
+            if (!IsSsse3Valid128(xSse2.LoadUnsafe(ref encoded).AsSByte()))
+            {
+                invalid = UnsafeBase64.GetInvalid(ref _map[0], ref encoded, 32);
+                return false;
+            }
+        }
+        else
+        {
+            if (!IsArm64Valid128(xArm64.LoadUnsafe(ref encoded).AsSByte()))
+            {
+                invalid = UnsafeBase64.GetInvalid(ref _map[0], ref encoded, 32);
+                return false;
+            }
+        }
+        invalid = default;
+        return true;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool IsVectorValid96(ref byte encoded)
+    {
+        if (Ssse3.IsSupported)
+        {
+            if (!IsSsse3Valid128(Vector128.LoadUnsafe(ref encoded).AsSByte()))
+                return false;
+        }
+        else
+        {
+            if (!IsArm64Valid128(Vector128.LoadUnsafe(ref encoded).AsSByte()))
+                return false;
+        }
+        return true;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool IsVectorValid96(ref char encoded)
+    {
+        if (Ssse3.IsSupported)
+        {
+            if (!IsSsse3Valid128(xSse2.LoadUnsafe(ref encoded).AsSByte()))
+                return false;
+        }
+        else
+        {
+            if (!IsArm64Valid128(xArm64.LoadUnsafe(ref encoded).AsSByte()))
+                return false;
+        }
+        return true;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsSsse3Valid128(Vector128<sbyte> vector)
     {
         Vector128<sbyte> maskSlashOrUnderscore = Vector128.Create((sbyte)0x5F);//_
@@ -670,6 +748,70 @@ public static class VectorBase64Url
         Vector128<sbyte> hiNibbles = Vector128.ShiftRightLogical(vector.AsInt32(), 4).AsSByte() & maskSlashOrUnderscore;
         Vector128<sbyte> eq5F = Vector128.Equals(vector, maskSlashOrUnderscore);
         return IsArm64Valid128(vector, hiNibbles, eq5F);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool VectorDecode96(ref byte encoded, ref byte src, out byte invalid)
+    {
+        Vector128<sbyte> vector = Vector128.LoadUnsafe(ref encoded).AsSByte();
+        Vector128<sbyte> maskSlashOrUnderscore = Vector128.Create((sbyte)0x5F);//_
+        Vector128<sbyte> hiNibbles = Vector128.ShiftRightLogical(vector.AsInt32(), 4).AsSByte() & maskSlashOrUnderscore;
+        Vector128<sbyte> eq5F = Vector128.Equals(vector, maskSlashOrUnderscore);
+        if (Ssse3.IsSupported)
+        {
+            if (!IsSsse3Valid128(vector, hiNibbles, eq5F))
+            {
+                invalid = UnsafeBase64.GetInvalid(ref _map[0], ref encoded, 16);
+                return false;
+            }
+            vector = Ssse3Decode128(vector, hiNibbles, eq5F);
+        }
+        else
+        {
+            if (!IsArm64Valid128(vector, hiNibbles, eq5F))
+            {
+                invalid = UnsafeBase64.GetInvalid(ref _map[0], ref encoded, 16);
+                return false;
+            }
+            vector = Arm64Decode128(vector, hiNibbles, eq5F);
+        }
+        vector.AsByte().StoreUnsafe(ref src);
+        invalid = default;
+        return true;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool VectorDecode96(ref char encoded, ref byte src, out char invalid)
+    {
+        Vector128<sbyte> vector;
+        Vector128<sbyte> maskSlashOrUnderscore = Vector128.Create((sbyte)0x5F);//_
+        if (Ssse3.IsSupported)
+        {
+            vector = xSse2.LoadUnsafe(ref encoded).AsSByte();
+            Vector128<sbyte> hiNibbles = Vector128.ShiftRightLogical(vector.AsInt32(), 4).AsSByte() & maskSlashOrUnderscore;
+            Vector128<sbyte> eq5F = Vector128.Equals(vector, maskSlashOrUnderscore);
+            if (!IsSsse3Valid128(vector, hiNibbles, eq5F))
+            {
+                invalid = UnsafeBase64.GetInvalid(ref _map[0], ref encoded, 32);
+                return false;
+            }
+            vector = Ssse3Decode128(vector, hiNibbles, eq5F);
+        }
+        else
+        {
+            vector = xArm64.LoadUnsafe(ref encoded).AsSByte();
+            Vector128<sbyte> hiNibbles = Vector128.ShiftRightLogical(vector.AsInt32(), 4).AsSByte() & maskSlashOrUnderscore;
+            Vector128<sbyte> eq5F = Vector128.Equals(vector, maskSlashOrUnderscore);
+            if (!IsArm64Valid128(vector, hiNibbles, eq5F))
+            {
+                invalid = UnsafeBase64.GetInvalid(ref _map[0], ref encoded, 32);
+                return false;
+            }
+            vector = Arm64Decode128(vector, hiNibbles, eq5F);
+        }
+        vector.AsByte().StoreUnsafe(ref src);
+        invalid = default;
+        return true;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
