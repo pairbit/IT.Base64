@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -26,12 +27,17 @@ public class Base64Encoder
     public Base64Encoder(ReadOnlySpan<byte> bytes)
     {
         if (bytes.Length != 64) throw new ArgumentOutOfRangeException(nameof(bytes), bytes.Length, "length != 64");
-
+        
+        var set = new HashSet<byte>(64);
+        foreach (var b in bytes)
+        {
+            if (!set.Add(b)) throw new ArgumentException($"byte {b} is duplicated", nameof(bytes));
+        }
         var array = bytes.ToArray();
 
         _bytes = array;
         _chars = System.Text.Encoding.UTF8.GetChars(array);
-        Encoding = System.Text.Encoding.UTF8.GetString(bytes);
+        Encoding = System.Text.Encoding.UTF8.GetString(array);
     }
 
     public static sbyte[] GetDecodingMap(ReadOnlySpan<byte> bytes)
