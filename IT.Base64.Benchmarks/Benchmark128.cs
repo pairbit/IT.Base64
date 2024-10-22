@@ -12,6 +12,7 @@ namespace IT.Base64.Benchmarks;
 public class Benchmark128
 {
     private Id _id;
+    private byte[] _idEncodedBytes = null!;
     private Guid _guid;
     private string _encodedString = null!;
     private byte[] _encodedBytes = null!;
@@ -21,6 +22,7 @@ public class Benchmark128
     public void GlobalSetup()
     {
         _id = Id.New();
+        _idEncodedBytes = Id_UnsafeVectorEncode();
         _guid = Guid.NewGuid();
         _encodedString = EncodeToString_Simple();
         _encodedBytes = EncodeToBytes_Simple();
@@ -237,6 +239,22 @@ public class Benchmark128
         return guid;
     }
 
+    [Benchmark]
+    public Id Id_VectorDecode()
+    {
+        Id id = default;
+        VectorBase64Url.TryDecode96(ref _idEncodedBytes[0], ref Unsafe.As<Id, byte>(ref id));
+        return id;
+    }
+
+    [Benchmark]
+    public Id Id_UnsafeDecode()
+    {
+        Id id = default;
+        UnsafeBase64.TryDecode96(ref MemoryMarshal.GetReference(Base64Decoder.Url.Map.Span), ref _idEncodedBytes[0], ref Unsafe.As<Id, byte>(ref id));
+        return id;
+    }
+
     #endregion DecodeFromBytes
 
     public void Test()
@@ -274,6 +292,10 @@ public class Benchmark128
             if (!guid.Equals(DecodeFromBytes_gfoidl())) throw new InvalidOperationException(nameof(DecodeFromBytes_gfoidl));
             if (!guid.Equals(DecodeFromBytes_IT())) throw new InvalidOperationException(nameof(DecodeFromBytes_IT));
             if (!guid.Equals(DecodeFromBytes_IT_Vector())) throw new InvalidOperationException(nameof(DecodeFromBytes_IT_Vector));
+
+            var id = _id;
+            if (!id.Equals(Id_VectorDecode())) throw new InvalidOperationException(nameof(Id_VectorDecode));
+            if (!id.Equals(Id_UnsafeDecode())) throw new InvalidOperationException(nameof(Id_UnsafeDecode));
         }
     }
 
