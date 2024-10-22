@@ -372,13 +372,109 @@ public static class VectorBase64Url
         }
     }
 
-    public static bool TryDecode128(ref byte encoded, ref byte src) =>
-        TryDecode96(ref encoded, ref src) &&
-        UnsafeBase64.TryDecode32(ref _map[0], ref Unsafe.AddByteOffset(ref encoded, 16), ref Unsafe.AddByteOffset(ref src, 12));
+    public static bool TryDecode104(ref byte encoded, ref byte src)
+    {
+        if (BitConverter.IsLittleEndian && Vector128.IsHardwareAccelerated && (Ssse3.IsSupported || AdvSimd.Arm64.IsSupported))
+        {
+            return VectorDecode96(ref encoded, ref src) &&
+                UnsafeBase64.TryDecode8(ref _map[0], ref Unsafe.AddByteOffset(ref encoded, 16), ref Unsafe.AddByteOffset(ref src, 12));
+        }
+        else
+        {
+            return UnsafeBase64.TryDecode104(ref _map[0], ref encoded, ref src);
+        }
+    }
 
-    public static bool TryDecode128(ref char encoded, ref byte src) =>
-        TryDecode96(ref encoded, ref src) &&
-        UnsafeBase64.TryDecode32(ref _map[0], ref Unsafe.AddByteOffset(ref encoded, 32), ref Unsafe.AddByteOffset(ref src, 12));
+    public static bool TryDecode104(ref char encoded, ref byte src)
+    {
+        if (BitConverter.IsLittleEndian && Vector128.IsHardwareAccelerated && (Ssse3.IsSupported || AdvSimd.Arm64.IsSupported))
+        {
+            return VectorDecode96(ref encoded, ref src) &&
+                UnsafeBase64.TryDecode8(ref _map[0], ref Unsafe.AddByteOffset(ref encoded, 32), ref Unsafe.AddByteOffset(ref src, 12));
+        }
+        else
+        {
+            return UnsafeBase64.TryDecode104(ref _map[0], ref encoded, ref src);
+        }
+    }
+
+    public static bool TryDecode112(ref byte encoded, ref byte src)
+    {
+        if (BitConverter.IsLittleEndian && Vector128.IsHardwareAccelerated && (Ssse3.IsSupported || AdvSimd.Arm64.IsSupported))
+        {
+            return VectorDecode96(ref encoded, ref src) &&
+                UnsafeBase64.TryDecode16(ref _map[0], ref Unsafe.AddByteOffset(ref encoded, 16), ref Unsafe.AddByteOffset(ref src, 12));
+        }
+        else
+        {
+            return UnsafeBase64.TryDecode112(ref _map[0], ref encoded, ref src);
+        }
+    }
+
+    public static bool TryDecode112(ref char encoded, ref byte src)
+    {
+        if (BitConverter.IsLittleEndian && Vector128.IsHardwareAccelerated && (Ssse3.IsSupported || AdvSimd.Arm64.IsSupported))
+        {
+            return VectorDecode96(ref encoded, ref src) &&
+                UnsafeBase64.TryDecode16(ref _map[0], ref Unsafe.AddByteOffset(ref encoded, 32), ref Unsafe.AddByteOffset(ref src, 12));
+        }
+        else
+        {
+            return UnsafeBase64.TryDecode112(ref _map[0], ref encoded, ref src);
+        }
+    }
+
+    public static bool TryDecode120(ref byte encoded, ref byte src)
+    {
+        if (BitConverter.IsLittleEndian && Vector128.IsHardwareAccelerated && (Ssse3.IsSupported || AdvSimd.Arm64.IsSupported))
+        {
+            return VectorDecode96(ref encoded, ref src) &&
+                UnsafeBase64.TryDecode24(ref _map[0], ref Unsafe.AddByteOffset(ref encoded, 16), ref Unsafe.AddByteOffset(ref src, 12));
+        }
+        else
+        {
+            return UnsafeBase64.TryDecode120(ref _map[0], ref encoded, ref src);
+        }
+    }
+
+    public static bool TryDecode120(ref char encoded, ref byte src)
+    {
+        if (BitConverter.IsLittleEndian && Vector128.IsHardwareAccelerated && (Ssse3.IsSupported || AdvSimd.Arm64.IsSupported))
+        {
+            return VectorDecode96(ref encoded, ref src) &&
+                UnsafeBase64.TryDecode24(ref _map[0], ref Unsafe.AddByteOffset(ref encoded, 32), ref Unsafe.AddByteOffset(ref src, 12));
+        }
+        else
+        {
+            return UnsafeBase64.TryDecode120(ref _map[0], ref encoded, ref src);
+        }
+    }
+
+    public static bool TryDecode128(ref byte encoded, ref byte src)
+    {
+        if (BitConverter.IsLittleEndian && Vector128.IsHardwareAccelerated && (Ssse3.IsSupported || AdvSimd.Arm64.IsSupported))
+        {
+            return VectorDecode96(ref encoded, ref src) &&
+                UnsafeBase64.TryDecode32(ref _map[0], ref Unsafe.AddByteOffset(ref encoded, 16), ref Unsafe.AddByteOffset(ref src, 12));
+        }
+        else
+        {
+            return UnsafeBase64.TryDecode128(ref _map[0], ref encoded, ref src);
+        }
+    }
+
+    public static bool TryDecode128(ref char encoded, ref byte src)
+    {
+        if (BitConverter.IsLittleEndian && Vector128.IsHardwareAccelerated && (Ssse3.IsSupported || AdvSimd.Arm64.IsSupported))
+        {
+            return VectorDecode96(ref encoded, ref src) &&
+                UnsafeBase64.TryDecode32(ref _map[0], ref Unsafe.AddByteOffset(ref encoded, 32), ref Unsafe.AddByteOffset(ref src, 12));
+        }
+        else
+        {
+            return UnsafeBase64.TryDecode128(ref _map[0], ref encoded, ref src);
+        }
+    }
 
     public static bool TryDecode128(ref byte encoded, ref byte src, out byte invalid)
     {
