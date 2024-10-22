@@ -219,10 +219,11 @@ public static class VectorBase64Url
     {
         if (BitConverter.IsLittleEndian && Vector128.IsHardwareAccelerated && (Ssse3.IsSupported || AdvSimd.Arm64.IsSupported))
         {
-            (Ssse3.IsSupported ? Ssse3Encode128(ref src) : Arm64Encode128(ref src)).AsByte().StoreUnsafe(ref encoded);
+            VectorEncode96(ref src, ref encoded);
         }
         else
         {
+            //TODO: ref MemoryMarshal.GetArrayDataReference(_bytes) ???
             UnsafeBase64.Encode96(ref _bytes[0], ref src, ref encoded);
         }
     }
@@ -231,14 +232,7 @@ public static class VectorBase64Url
     {
         if (BitConverter.IsLittleEndian && Vector128.IsHardwareAccelerated && (Ssse3.IsSupported || AdvSimd.Arm64.IsSupported))
         {
-            if (Ssse3.IsSupported)
-            {
-                xSse2.StoreUnsafe(Ssse3Encode128(ref src), ref encoded);
-            }
-            else
-            {
-                xVector128.StoreUnsafe(Arm64Encode128(ref src), ref encoded);
-            }
+            VectorEncode96(ref src, ref encoded);
         }
         else
         {
@@ -248,56 +242,110 @@ public static class VectorBase64Url
 
     public static void Encode104(ref byte src, ref byte encoded)
     {
-        Encode96(ref src, ref encoded);
-        UnsafeBase64.Encode8(ref _bytes[0], ref Unsafe.AddByteOffset(ref src, 12), ref Unsafe.AddByteOffset(ref encoded, 16));
+        if (BitConverter.IsLittleEndian && Vector128.IsHardwareAccelerated && (Ssse3.IsSupported || AdvSimd.Arm64.IsSupported))
+        {
+            VectorEncode96(ref src, ref encoded);
+            UnsafeBase64.Encode8(ref _bytes[0], ref Unsafe.AddByteOffset(ref src, 12), ref Unsafe.AddByteOffset(ref encoded, 16));
+        }
+        else
+        {
+            UnsafeBase64.Encode104(ref _bytes[0], ref src, ref encoded);
+        }
     }
 
     public static void Encode104(ref byte src, ref char encoded)
     {
-        Encode96(ref src, ref encoded);
-        UnsafeBase64.Encode8(ref _chars[0], ref Unsafe.AddByteOffset(ref src, 12), ref Unsafe.AddByteOffset(ref encoded, 32));
+        if (BitConverter.IsLittleEndian && Vector128.IsHardwareAccelerated && (Ssse3.IsSupported || AdvSimd.Arm64.IsSupported))
+        {
+            VectorEncode96(ref src, ref encoded);
+            UnsafeBase64.Encode8(ref _chars[0], ref Unsafe.AddByteOffset(ref src, 12), ref Unsafe.AddByteOffset(ref encoded, 32));
+        }
+        else
+        {
+            UnsafeBase64.Encode104(ref _chars[0], ref src, ref encoded);
+        }
     }
 
     public static void Encode112(ref byte src, ref byte encoded)
     {
-        Encode96(ref src, ref encoded);
-        UnsafeBase64.Encode16(ref _bytes[0], ref Unsafe.AddByteOffset(ref src, 12), ref Unsafe.AddByteOffset(ref encoded, 16));
+        if (BitConverter.IsLittleEndian && Vector128.IsHardwareAccelerated && (Ssse3.IsSupported || AdvSimd.Arm64.IsSupported))
+        {
+            VectorEncode96(ref src, ref encoded);
+            UnsafeBase64.Encode16(ref _bytes[0], ref Unsafe.AddByteOffset(ref src, 12), ref Unsafe.AddByteOffset(ref encoded, 16));
+        }
+        else
+        {
+            UnsafeBase64.Encode112(ref _bytes[0], ref src, ref encoded);
+        }
     }
 
     public static void Encode112(ref byte src, ref char encoded)
     {
-        Encode96(ref src, ref encoded);
-        UnsafeBase64.Encode16(ref _chars[0], ref Unsafe.AddByteOffset(ref src, 12), ref Unsafe.AddByteOffset(ref encoded, 32));
+        if (BitConverter.IsLittleEndian && Vector128.IsHardwareAccelerated && (Ssse3.IsSupported || AdvSimd.Arm64.IsSupported))
+        {
+            VectorEncode96(ref src, ref encoded);
+            UnsafeBase64.Encode16(ref _chars[0], ref Unsafe.AddByteOffset(ref src, 12), ref Unsafe.AddByteOffset(ref encoded, 32));
+        }
+        else
+        {
+            UnsafeBase64.Encode112(ref _chars[0], ref src, ref encoded);
+        }
     }
 
     public static void Encode120(ref byte src, ref byte encoded)
     {
-        Encode96(ref src, ref encoded);
-        UnsafeBase64.Encode24(ref _bytes[0], ref Unsafe.AddByteOffset(ref src, 12), ref Unsafe.AddByteOffset(ref encoded, 16));
+        if (BitConverter.IsLittleEndian && Vector128.IsHardwareAccelerated && (Ssse3.IsSupported || AdvSimd.Arm64.IsSupported))
+        {
+            VectorEncode96(ref src, ref encoded);
+            UnsafeBase64.Encode24(ref _bytes[0], ref Unsafe.AddByteOffset(ref src, 12), ref Unsafe.AddByteOffset(ref encoded, 16));
+        }
+        else
+        {
+            UnsafeBase64.Encode120(ref _bytes[0], ref src, ref encoded);
+        }
     }
 
     public static void Encode120(ref byte src, ref char encoded)
     {
-        Encode96(ref src, ref encoded);
-        UnsafeBase64.Encode24(ref _chars[0], ref Unsafe.AddByteOffset(ref src, 12), ref Unsafe.AddByteOffset(ref encoded, 32));
+        if (BitConverter.IsLittleEndian && Vector128.IsHardwareAccelerated && (Ssse3.IsSupported || AdvSimd.Arm64.IsSupported))
+        {
+            VectorEncode96(ref src, ref encoded);
+            UnsafeBase64.Encode24(ref _chars[0], ref Unsafe.AddByteOffset(ref src, 12), ref Unsafe.AddByteOffset(ref encoded, 32));
+        }
+        else
+        {
+            UnsafeBase64.Encode120(ref _chars[0], ref src, ref encoded);
+        }
     }
 
     public static void Encode128(ref byte src, ref byte encoded)
     {
-        Encode96(ref src, ref encoded);
-
-        ref var bytes = ref _bytes[0];
-        UnsafeBase64.Encode24(ref bytes, ref Unsafe.AddByteOffset(ref src, 12), ref Unsafe.AddByteOffset(ref encoded, 16));
-        UnsafeBase64.Encode8(ref bytes, ref Unsafe.AddByteOffset(ref src, 15), ref Unsafe.AddByteOffset(ref encoded, 20));
+        if (BitConverter.IsLittleEndian && Vector128.IsHardwareAccelerated && (Ssse3.IsSupported || AdvSimd.Arm64.IsSupported))
+        {
+            VectorEncode96(ref src, ref encoded);
+            ref var bytes = ref _bytes[0];
+            UnsafeBase64.Encode24(ref bytes, ref Unsafe.AddByteOffset(ref src, 12), ref Unsafe.AddByteOffset(ref encoded, 16));
+            UnsafeBase64.Encode8(ref bytes, ref Unsafe.AddByteOffset(ref src, 15), ref Unsafe.AddByteOffset(ref encoded, 20));
+        }
+        else
+        {
+            UnsafeBase64.Encode128(ref _bytes[0], ref src, ref encoded);
+        }
     }
 
     public static void Encode128(ref byte src, ref char encoded)
     {
-        Encode96(ref src, ref encoded);
-
-        ref var chars = ref _chars[0];
-        UnsafeBase64.Encode24(ref chars, ref Unsafe.AddByteOffset(ref src, 12), ref Unsafe.AddByteOffset(ref encoded, 32));
-        UnsafeBase64.Encode8(ref chars, ref Unsafe.AddByteOffset(ref src, 15), ref Unsafe.AddByteOffset(ref encoded, 40));
+        if (BitConverter.IsLittleEndian && Vector128.IsHardwareAccelerated && (Ssse3.IsSupported || AdvSimd.Arm64.IsSupported))
+        {
+            VectorEncode96(ref src, ref encoded);
+            ref var chars = ref _chars[0];
+            UnsafeBase64.Encode24(ref chars, ref Unsafe.AddByteOffset(ref src, 12), ref Unsafe.AddByteOffset(ref encoded, 32));
+            UnsafeBase64.Encode8(ref chars, ref Unsafe.AddByteOffset(ref src, 15), ref Unsafe.AddByteOffset(ref encoded, 40));
+        }
+        else
+        {
+            UnsafeBase64.Encode128(ref _chars[0], ref src, ref encoded);
+        }
     }
 
     public static bool TryDecode96(ref byte encoded, ref byte src)
@@ -627,6 +675,23 @@ public static class VectorBase64Url
                 )
             ).AsByte(),
             GetDecodeShuffleVec());
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void VectorEncode96(ref byte src, ref byte encoded)
+        => (Ssse3.IsSupported ? Ssse3Encode128(ref src) : Arm64Encode128(ref src)).AsByte().StoreUnsafe(ref encoded);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void VectorEncode96(ref byte src, ref char encoded)
+    {
+        if (Ssse3.IsSupported)
+        {
+            xSse2.StoreUnsafe(Ssse3Encode128(ref src), ref encoded);
+        }
+        else
+        {
+            xVector128.StoreUnsafe(Arm64Encode128(ref src), ref encoded);
+        }
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static Vector128<sbyte> Ssse3Encode128(ref byte src)
