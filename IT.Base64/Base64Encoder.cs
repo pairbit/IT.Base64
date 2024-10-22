@@ -479,6 +479,99 @@ public class Base64Encoder
 
     #endregion unmanaged
 
+    #region Bytes
+
+    public EncodingStatus TryEncode128(ReadOnlySpan<byte> data, Span<byte> encoded)
+    {
+        if (data.Length < 16) return EncodingStatus.InvalidDataLength;
+        if (encoded.Length < 22) return EncodingStatus.InvalidDestinationLength;
+
+        if (_isVectorUrl)
+            VectorBase64Url.Encode128(ref MemoryMarshal.GetReference(data), ref MemoryMarshal.GetReference(encoded));
+        else
+            UnsafeBase64.Encode128(ref _bytes[0], ref MemoryMarshal.GetReference(data), ref MemoryMarshal.GetReference(encoded));
+
+        return EncodingStatus.Done;
+    }
+
+    public EncodingStatus TryEncode128(ReadOnlySpan<byte> data, Span<char> encoded)
+    {
+        if (data.Length < 16) return EncodingStatus.InvalidDataLength;
+        if (encoded.Length < 22) return EncodingStatus.InvalidDestinationLength;
+
+        if (_isVectorUrl)
+            VectorBase64Url.Encode128(ref MemoryMarshal.GetReference(data), ref MemoryMarshal.GetReference(encoded));
+        else
+            UnsafeBase64.Encode128(ref _chars[0], ref MemoryMarshal.GetReference(data), ref MemoryMarshal.GetReference(encoded));
+
+        return EncodingStatus.Done;
+    }
+
+    /// <exception cref="ArgumentOutOfRangeException"/>
+    public void Encode128(ReadOnlySpan<byte> data, Span<byte> encoded)
+    {
+        if (data.Length < 16) throw new ArgumentOutOfRangeException(nameof(data), data.Length, "length < 16");
+        if (encoded.Length < 22) throw new ArgumentOutOfRangeException(nameof(encoded), encoded.Length, "length < 22");
+
+        if (_isVectorUrl)
+            VectorBase64Url.Encode128(ref MemoryMarshal.GetReference(data), ref MemoryMarshal.GetReference(encoded));
+        else
+            UnsafeBase64.Encode128(ref _bytes[0], ref MemoryMarshal.GetReference(data), ref MemoryMarshal.GetReference(encoded));
+    }
+
+    /// <exception cref="ArgumentOutOfRangeException"/>
+    public void Encode128(ReadOnlySpan<byte> data, Span<char> encoded)
+    {
+        if (data.Length < 16) throw new ArgumentOutOfRangeException(nameof(data), data.Length, "length < 16");
+        if (encoded.Length < 22) throw new ArgumentOutOfRangeException(nameof(encoded), encoded.Length, "length < 22");
+
+        if (_isVectorUrl)
+            VectorBase64Url.Encode128(ref MemoryMarshal.GetReference(data), ref MemoryMarshal.GetReference(encoded));
+        else
+            UnsafeBase64.Encode128(ref _chars[0], ref MemoryMarshal.GetReference(data), ref MemoryMarshal.GetReference(encoded));
+    }
+
+    public byte[] Encode128ToBytes(ReadOnlySpan<byte> data)
+    {
+        if (data.Length < 16) throw new ArgumentOutOfRangeException(nameof(data), data.Length, "length < 16");
+        var encoded = new byte[22];
+
+        if (_isVectorUrl)
+            VectorBase64Url.Encode128(ref MemoryMarshal.GetReference(data), ref encoded[0]);
+        else
+            UnsafeBase64.Encode128(ref _bytes[0], ref MemoryMarshal.GetReference(data), ref encoded[0]);
+
+        return encoded;
+    }
+
+    public char[] Encode128ToChars(ReadOnlySpan<byte> data)
+    {
+        if (data.Length < 16) throw new ArgumentOutOfRangeException(nameof(data), data.Length, "length < 16");
+        var encoded = new char[22];
+
+        if (_isVectorUrl)
+            VectorBase64Url.Encode128(ref MemoryMarshal.GetReference(data), ref encoded[0]);
+        else
+            UnsafeBase64.Encode128(ref _chars[0], ref MemoryMarshal.GetReference(data), ref encoded[0]);
+
+        return encoded;
+    }
+
+    public string Encode128ToString(ReadOnlySpan<byte> data)
+    {
+        if (data.Length < 16) throw new ArgumentOutOfRangeException(nameof(data), data.Length, "length < 16");
+        var encoded = new string('\0', 22);
+
+        if (_isVectorUrl)
+            VectorBase64Url.Encode128(ref MemoryMarshal.GetReference(data), ref Unsafe.AsRef(in encoded.GetPinnableReference()));
+        else
+            UnsafeBase64.Encode128(ref _chars[0], ref MemoryMarshal.GetReference(data), ref Unsafe.AsRef(in encoded.GetPinnableReference()));
+
+        return encoded;
+    }
+
+    #endregion Bytes
+
     #endregion Encode128
 
     #region Encode72
