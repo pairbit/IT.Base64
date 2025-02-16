@@ -1342,6 +1342,108 @@ public readonly struct Base64Decoder
 
     #region Decode64
 
+    #region unmanaged
+
+    public DecodingStatus TryDecode64<T>(ReadOnlySpan<byte> encoded, out T value) where T : unmanaged
+    {
+        value = default;
+        if (Unsafe.SizeOf<T>() < 8) return DecodingStatus.InvalidDestinationLength;
+        if (encoded.Length < 11) return DecodingStatus.InvalidDataLength;
+
+        if (!UnsafeBase64.TryDecode64(ref _map[0], ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<T, byte>(ref value)))
+        {
+            value = default;
+            return DecodingStatus.InvalidData;
+        }
+        return DecodingStatus.Done;
+    }
+
+    public DecodingStatus TryDecode64<T>(ReadOnlySpan<char> encoded, out T value) where T : unmanaged
+    {
+        value = default;
+        if (Unsafe.SizeOf<T>() < 8) return DecodingStatus.InvalidDestinationLength;
+        if (encoded.Length < 11) return DecodingStatus.InvalidDataLength;
+
+        if (!UnsafeBase64.TryDecode64(ref _map[0], ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<T, byte>(ref value)))
+        {
+            value = default;
+            return DecodingStatus.InvalidData;
+        }
+        return DecodingStatus.Done;
+    }
+
+    public DecodingStatus TryDecode64<T>(ReadOnlySpan<byte> encoded, out T value, out byte invalid) where T : unmanaged
+    {
+        value = default;
+        if (Unsafe.SizeOf<T>() < 8)
+        {
+            invalid = default;
+            return DecodingStatus.InvalidDestinationLength;
+        }
+        if (encoded.Length < 11)
+        {
+            invalid = default;
+            return DecodingStatus.InvalidDataLength;
+        }
+        if (!UnsafeBase64.TryDecode64(ref _map[0], ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<T, byte>(ref value), out invalid))
+        {
+            value = default;
+            return DecodingStatus.InvalidData;
+        }
+        return DecodingStatus.Done;
+    }
+
+    public DecodingStatus TryDecode64<T>(ReadOnlySpan<char> encoded, out T value, out char invalid) where T : unmanaged
+    {
+        value = default;
+        if (Unsafe.SizeOf<T>() < 8)
+        {
+            invalid = default;
+            return DecodingStatus.InvalidDestinationLength;
+        }
+        if (encoded.Length < 11)
+        {
+            invalid = default;
+            return DecodingStatus.InvalidDataLength;
+        }
+        if (!UnsafeBase64.TryDecode64(ref _map[0], ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<T, byte>(ref value), out invalid))
+        {
+            value = default;
+            return DecodingStatus.InvalidData;
+        }
+        return DecodingStatus.Done;
+    }
+
+    /// <exception cref="ArgumentOutOfRangeException"/>
+    public T Decode64<T>(ReadOnlySpan<byte> encoded) where T : unmanaged
+    {
+        if (Unsafe.SizeOf<T>() < 8) throw new ArgumentOutOfRangeException(nameof(T), Unsafe.SizeOf<T>(), $"SizeOf<{typeof(T).FullName}> < 8");
+        if (encoded.Length < 11) throw new ArgumentOutOfRangeException(nameof(encoded), encoded.Length, "length < 11");
+
+        T value = default;
+        if (!UnsafeBase64.TryDecode64(ref _map[0], ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<T, byte>(ref value), out var invalid))
+            throw new ArgumentOutOfRangeException(nameof(encoded), invalid, "invalid byte");
+
+        return value;
+    }
+
+    /// <exception cref="ArgumentOutOfRangeException"/>
+    public T Decode64<T>(ReadOnlySpan<char> encoded) where T : unmanaged
+    {
+        if (Unsafe.SizeOf<T>() < 8) throw new ArgumentOutOfRangeException(nameof(T), Unsafe.SizeOf<T>(), $"SizeOf<{typeof(T).FullName}> < 8");
+        if (encoded.Length < 11) throw new ArgumentOutOfRangeException(nameof(encoded), encoded.Length, "length < 11");
+
+        T value = default;
+        if (!UnsafeBase64.TryDecode64(ref _map[0], ref MemoryMarshal.GetReference(encoded), ref Unsafe.As<T, byte>(ref value), out var invalid))
+            throw new ArgumentOutOfRangeException(nameof(encoded), invalid, "invalid char");
+
+        return value;
+    }
+
+    #endregion unmanaged
+
+    #region ulong
+
     public DecodingStatus TryDecode64(ReadOnlySpan<byte> encoded, out ulong value)
     {
         value = default;
@@ -1423,6 +1525,8 @@ public readonly struct Base64Decoder
 
         return value;
     }
+
+    #endregion ulong
 
     #endregion Decode64
 
