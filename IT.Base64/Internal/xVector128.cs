@@ -1,7 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 
-namespace IT.Base64;
+namespace IT.Base64.Internal;
 
 internal static class xVector128
 {

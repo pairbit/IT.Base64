@@ -2,7 +2,7 @@
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 
-namespace IT.Base64;
+namespace IT.Base64.Internal;
 
 internal static class xSse2
 {
