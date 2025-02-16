@@ -19,8 +19,6 @@ public class Base64Encoder
     internal readonly char[] _chars;
     internal readonly byte[] _bytes;
 
-    public string Encoding { get; }
-
     public ReadOnlyMemory<char> Chars => _chars;
 
     public ReadOnlyMemory<byte> Bytes => _bytes;
@@ -40,77 +38,8 @@ public class Base64Encoder
 
         _bytes = array;
         _chars = System.Text.Encoding.UTF8.GetChars(array);
-        Encoding = System.Text.Encoding.UTF8.GetString(array);
         _isVectorUrl = isVectorUrl;
     }
-
-    public static sbyte[] GetDecodingMap(ReadOnlySpan<byte> bytes)
-    {
-        if (bytes.Length != 64) throw new ArgumentOutOfRangeException(nameof(bytes), bytes.Length, "length != 64");
-
-        var map = new sbyte[256];
-        for (int i = 0; i < map.Length; i++)
-        {
-            map[i] = -1;
-        }
-        for (var i = 0; i < bytes.Length; i++)
-        {
-            map[bytes[i]] = (sbyte)i;
-        }
-        return map;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int GetMaxEncodedLength(int dataLength)
-    {
-        if ((uint)dataLength > MaxDataLength)
-            throw new ArgumentOutOfRangeException(nameof(dataLength), dataLength, $"dataLength > {MaxDataLength}");
-
-        return (int)(((uint)dataLength + 2) / 3) * 4;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int GetPaddingLength(int dataLength)
-    {
-        // Calculation is:
-        // switch (dataLength % 3)
-        // 0 -> 0
-        // 1 -> 2
-        // 2 -> 1
-        int mod3 = FastMod3(dataLength);
-        return mod3 == 0 ? 0 : (3 - mod3);
-        //---------------------------------------------------------------------
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int FastMod3(int value)
-        {
-            if (Environment.Is64BitProcess)
-            {
-                // We use modified Daniel Lemire's fastmod algorithm (https://github.com/dotnet/runtime/pull/406),
-                // which allows to avoid the long multiplication if the divisor is less than 2**31.
-                Debug.Assert(value <= int.MaxValue);
-
-                ulong lowbits = (ulong.MaxValue / 3 + 1) * (uint)value;
-
-#if NET5_0_OR_GREATER
-                uint highbits = (uint)Math.BigMul(lowbits, 3, out _);
-#else
-                // 64bit * 64bit => 128bit isn't currently supported by Math https://github.com/dotnet/runtime/issues/31184
-                // otherwise we'd want this to be (uint)Math.BigMul(lowbits, divisor, out _)
-                uint highbits = (uint)((((lowbits >> 32) + 1) * 3) >> 32);
-#endif
-
-                Debug.Assert(highbits == value % 3);
-                return (int)highbits;
-            }
-            else
-            {
-                return value % 3;
-            }
-        }
-    }
-
-    public static int GetEncodedLength(int dataLength)
-        => GetMaxEncodedLength(dataLength) - GetPaddingLength(dataLength);
 
     public sbyte[] GetDecodingMap() => GetDecodingMap(_bytes);
 
@@ -975,4 +904,72 @@ public class Base64Encoder
     });
 
     #endregion Encode8
+
+    public static sbyte[] GetDecodingMap(ReadOnlySpan<byte> bytes)
+    {
+        if (bytes.Length != 64) throw new ArgumentOutOfRangeException(nameof(bytes), bytes.Length, "length != 64");
+
+        var map = new sbyte[256];
+        for (int i = 0; i < map.Length; i++)
+        {
+            map[i] = -1;
+        }
+        for (var i = 0; i < bytes.Length; i++)
+        {
+            map[bytes[i]] = (sbyte)i;
+        }
+        return map;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int GetMaxEncodedLength(int dataLength)
+    {
+        if ((uint)dataLength > MaxDataLength)
+            throw new ArgumentOutOfRangeException(nameof(dataLength), dataLength, $"dataLength > {MaxDataLength}");
+
+        return (int)(((uint)dataLength + 2) / 3) * 4;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int GetPaddingLength(int dataLength)
+    {
+        // Calculation is:
+        // switch (dataLength % 3)
+        // 0 -> 0
+        // 1 -> 2
+        // 2 -> 1
+        int mod3 = FastMod3(dataLength);
+        return mod3 == 0 ? 0 : (3 - mod3);
+        //---------------------------------------------------------------------
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int FastMod3(int value)
+        {
+            if (Environment.Is64BitProcess)
+            {
+                // We use modified Daniel Lemire's fastmod algorithm (https://github.com/dotnet/runtime/pull/406),
+                // which allows to avoid the long multiplication if the divisor is less than 2**31.
+                Debug.Assert(value <= int.MaxValue);
+
+                ulong lowbits = (ulong.MaxValue / 3 + 1) * (uint)value;
+
+#if NET5_0_OR_GREATER
+                uint highbits = (uint)Math.BigMul(lowbits, 3, out _);
+#else
+                // 64bit * 64bit => 128bit isn't currently supported by Math https://github.com/dotnet/runtime/issues/31184
+                // otherwise we'd want this to be (uint)Math.BigMul(lowbits, divisor, out _)
+                uint highbits = (uint)((((lowbits >> 32) + 1) * 3) >> 32);
+#endif
+
+                Debug.Assert(highbits == value % 3);
+                return (int)highbits;
+            }
+            else
+            {
+                return value % 3;
+            }
+        }
+    }
+
+    public static int GetEncodedLength(int dataLength)
+        => GetMaxEncodedLength(dataLength) - GetPaddingLength(dataLength);
 }

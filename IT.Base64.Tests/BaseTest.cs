@@ -62,7 +62,10 @@ public class BaseTest
     {
         Assert.That(Unsafe.SizeOf<Struct24>, Is.EqualTo(3));
         Assert.That(Unsafe.SizeOf<Struct72>, Is.EqualTo(9));
+        Assert.That(Unsafe.SizeOf<Struct80>, Is.EqualTo(10));
         Assert.That(Unsafe.SizeOf<Struct176>, Is.EqualTo(22));
+
+        Assert.That(Unsafe.SizeOf<Base64Decoder>, Is.EqualTo(8));
     }
 
     [Test]

@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace IT.Base64;
 
-public class Base64Decoder
+public readonly struct Base64Decoder
 {
     public static readonly Base64Decoder Default = new([
     -1, //0
